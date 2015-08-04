@@ -3,7 +3,7 @@ package org.kbashar.hexer;
 /**
  * @author Khyrul Bashar
  */
-public class HexSelectEvent
+public class SelectEvent
 {
     public static final String NEXT = "next";
     public static final String PREVIOUS = "previous";
@@ -13,7 +13,7 @@ public class HexSelectEvent
     private final int hexIndex;
     private final String navigation;
 
-    HexSelectEvent(int ind, String nav)
+    SelectEvent(int ind, String nav)
     {
         hexIndex = ind;
         navigation = nav;

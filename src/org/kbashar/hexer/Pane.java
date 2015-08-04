@@ -1,8 +1,6 @@
 package org.kbashar.hexer;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -10,34 +8,14 @@ import javax.swing.JPanel;
 
 /**
  * @author Khyrul Bashar
- *
- * This class shows the hex values of the bytes in the HexViewer.
  */
-class HexPane extends JPanel implements HexSelectionChangeListener, MouseListener
+abstract class Pane extends JPanel implements HexModelChangeListener, HexSelectionChangeListener, MouseListener
 {
     private HexModel model;
-    private static final int WIDTH = 480;
-    private static final int HEIGHT = 330;
 
-    HexPane(HexModel model, HexChangeListener listener)
+    Pane(HexModel model)
     {
         this.model = model;
-        createUI(listener);
-    }
-
-    private void createUI(HexChangeListener listener)
-    {
-        addMouseListener(this);
-        setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setLayout(new FlowLayout(FlowLayout.LEFT));
-        for (int i = 0; i < model.size(); i++)
-        {
-            HexUnit unit = new HexUnit(model.getByte(i), i);
-            unit.addHexChangeListener(listener);
-            unit.addHexSelectionChangeListner(this);
-            add(unit);
-        }
-        requestFocusInWindow();
     }
 
     @Override
@@ -96,6 +74,8 @@ class HexPane extends JPanel implements HexSelectionChangeListener, MouseListene
         {
             ((HexUnit)getComponent(HexUnit.selectedIndex)).setSelected(false);
         }
+
+
         requestFocusInWindow();
     }
 

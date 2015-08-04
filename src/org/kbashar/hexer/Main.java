@@ -1,6 +1,5 @@
 package org.kbashar.hexer;
 
-import java.awt.Dimension;
 import javax.swing.JFrame;
 
 /**
@@ -12,21 +11,21 @@ public class Main
     {
         Byte[] array = new Byte[100];
 
-        HexController controller = new HexController();
-
         for (byte i = 0; i<100; i++)
         {
             array[i] = i;
+            System.out.print((char)(i));
         }
 
         HexModel model = new HexModel(array);
-        HexPane hexPane = new HexPane(model, controller);
+        //HexPane hexPane = new HexPane(model, controller);
+        //ASCIIPane pane = new ASCIIPane(model);
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.getContentPane().add(hexPane);
-        frame.setPreferredSize(new Dimension(500, 300));
+        frame.getContentPane().add(new HexEditor(model));
+        //frame.setPreferredSize(new Dimension(500, 300));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

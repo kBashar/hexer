@@ -5,5 +5,5 @@ package org.kbashar.hexer;
  */
 interface HexSelectionChangeListener
 {
-    void hexSelectionChanged(HexSelectEvent event);
+    void hexSelectionChanged(SelectEvent event);
 }
