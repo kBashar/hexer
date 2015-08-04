@@ -25,8 +25,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
 
-    public static int selectedIndex = -1;
-
     private final int index;
     private byte state = NORMAL;
     private int selectedChar = 0;
@@ -34,7 +32,7 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     private char[] chars;
 
     private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
-    private List<HexSelectionChangeListener> hexSelectionChangeListeners = new ArrayList<HexSelectionChangeListener>();
+    private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
 
     HexUnit(short bt, int i)
     {
@@ -120,7 +118,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     private void putInSelected()
     {
         state = SELECTED;
-        selectedIndex = index;
         requestFocusInWindow();
         repaint();
     }
@@ -157,6 +154,7 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
         {
             case 1:
                 putInSelected();
+                fireSelectionChange(SelectEvent.IN);
                 break;
             case 2:
                 selectedChar = 0;
@@ -254,9 +252,9 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     {
         SelectEvent event = new SelectEvent(index, navigation);
 
-        for (HexSelectionChangeListener ls: hexSelectionChangeListeners)
+        for (SelectionChangeListener ls: selectionChangeListeners)
         {
-            ls.hexSelectionChanged(event);
+            ls.selectionChanged(event);
         }
     }
 
@@ -271,9 +269,9 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
         hexChangeListeners.add(listener);
     }
 
-    public void addHexSelectionChangeListner(HexSelectionChangeListener listener)
+    void addSelectionChangedListener(SelectionChangeListener listener)
     {
-        hexSelectionChangeListeners.add(listener);
+        selectionChangeListeners.add(listener);
     }
 
     private static boolean isHexChar(char c)
@@ -283,11 +281,11 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
 
     public void setSelected(boolean selected)
     {
-        if (selected && selectedIndex != index)
+        if (selected && state != SELECTED)
         {
-           putInSelected();
+            putInSelected();
         }
-        else if (!selected && selectedIndex == index)
+        else if (!selected && state == SELECTED)
         {
             clearSelection();
         }

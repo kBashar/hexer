@@ -31,4 +31,25 @@ public class HexModel
     {
         return data.size();
     }
+
+    public int totalLine()
+    {
+        return size() % 16 != 0 ? size()/16 + 1 : size()/16;
+    }
+
+    public static int lineNumber(int index)
+    {
+        if (index == -1)
+        {
+            return 0;
+        }
+        else if (index == 0)
+        {
+            return 1;
+        }
+        else
+        {
+            return index % 16 != 0 ? index/16 + 1 : index/16;
+        }
+    }
 }

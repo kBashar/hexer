@@ -1,6 +1,5 @@
 package org.kbashar.hexer;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -13,19 +12,22 @@ import javax.swing.JPanel;
  *
  * This class shows the hex values of the bytes in the HexViewer.
  */
-class HexPane extends JPanel implements HexSelectionChangeListener, MouseListener
+class HexPane extends JPanel implements  MouseListener
 {
     private HexModel model;
+    private SelectionChangeListener listener;
+
     private static final int WIDTH = 480;
     private static final int HEIGHT = 330;
 
-    HexPane(HexModel model, HexChangeListener listener)
+    HexPane(HexModel model, HexChangeListener listener, SelectionChangeListener selectionChangeListener)
     {
         this.model = model;
-        createUI(listener);
+        this.listener = selectionChangeListener;
+        createUI(listener, selectionChangeListener);
     }
 
-    private void createUI(HexChangeListener listener)
+    private void createUI(HexChangeListener listener, SelectionChangeListener selectionChangeListener)
     {
         addMouseListener(this);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -34,45 +36,12 @@ class HexPane extends JPanel implements HexSelectionChangeListener, MouseListene
         {
             HexUnit unit = new HexUnit(model.getByte(i), i);
             unit.addHexChangeListener(listener);
-            unit.addHexSelectionChangeListner(this);
+            unit.addSelectionChangedListener(selectionChangeListener);
             add(unit);
         }
         requestFocusInWindow();
     }
 
-    @Override
-    public void hexSelectionChanged(SelectEvent event)
-    {
-        int index = event.getHexIndex();
-        if (event.getNavigation().equals(SelectEvent.NEXT))
-        {
-            index += 1;
-        }
-        else if (event.getNavigation().equals(SelectEvent.PREVIOUS))
-        {
-            index -= 1;
-        }
-        else if (event.getNavigation().equals(SelectEvent.UP))
-        {
-            index -= 16;
-        }
-        else if (event.getNavigation().equals(SelectEvent.DOWN))
-        {
-            index += 16;
-        }
-        if ( index >= 0 && index <= model.size()-1 )
-        {
-            Component component = getComponent(index);
-            if (HexUnit.selectedIndex >= 0)
-            {
-                ((HexUnit)getComponent(HexUnit.selectedIndex)).setSelected(false);
-            }
-
-            HexUnit unit = (HexUnit) component;
-            unit.setSelected(true);
-        }
-        System.out.println(event.getHexIndex() + "\n" + event.getNavigation());
-    }
 
     private Point indexToPoint(int index)
     {
@@ -92,11 +61,7 @@ class HexPane extends JPanel implements HexSelectionChangeListener, MouseListene
     @Override
     public void mousePressed(MouseEvent mouseEvent)
     {
-        if (HexUnit.selectedIndex >= 0)
-        {
-            ((HexUnit)getComponent(HexUnit.selectedIndex)).setSelected(false);
-        }
-        requestFocusInWindow();
+        listener.selectionChanged(new SelectEvent(-1, SelectEvent.NONE));
     }
 
     @Override

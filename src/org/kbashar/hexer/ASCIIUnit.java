@@ -24,13 +24,11 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
 
-    public static int selectedIndex = -1;
-
     private final int index;
     private byte state = NORMAL;
     private char[] content = new char[1];
 
-    private List<ASCIISelectionChangeListener> asciiSelectionChangeListeners = new ArrayList<ASCIISelectionChangeListener>();
+    private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
 
     ASCIIUnit(short bt, int i)
     {
@@ -79,7 +77,7 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
         g.drawRect(0, 0, TOTAL_PIXEL-2, TOTAL_PIXEL-2);
         g.setFont(font);
         g.setColor(new Color(98, 134, 198));
-        g.drawChars(content, 0, 1, 2, TOTAL_PIXEL-3);
+        g.drawChars(content, 0, 1, 2, TOTAL_PIXEL - 3);
     }
 
     private void clearSelection()
@@ -91,7 +89,6 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
     private void putInSelected()
     {
         state = SELECTED;
-        selectedIndex = index;
         requestFocusInWindow();
         repaint();
     }
@@ -116,6 +113,7 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
         {
             case 1:
                 putInSelected();
+                fireSelectionChange(SelectEvent.IN);
                 break;
         }
     }
@@ -175,9 +173,9 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
     {
         SelectEvent event = new SelectEvent(index, navigation);
 
-        for (ASCIISelectionChangeListener ls: asciiSelectionChangeListeners)
+        for (SelectionChangeListener ls: selectionChangeListeners)
         {
-            ls.ASCIISelectionChanged(event);
+            ls.selectionChanged(event);
         }
     }
 
@@ -187,24 +185,24 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
 
     }
 
-    public void addASCIISelectionChangeListener(ASCIISelectionChangeListener listener)
-    {
-        asciiSelectionChangeListeners.add(listener);
-    }
-
     private static boolean isAsciiPrintable(char ch) {
         return ch >= 32 && ch < 127;
     }
 
     public void setSelected(boolean selected)
     {
-        if (selected && selectedIndex != index)
+        if (selected && state != SELECTED)
         {
             putInSelected();
         }
-        else if (!selected && selectedIndex == index)
+        else if (!selected && state == SELECTED)
         {
             clearSelection();
         }
+    }
+
+    public void addSelectionChangeListener(SelectionChangeListener listener)
+    {
+        selectionChangeListeners.add(listener);
     }
 }

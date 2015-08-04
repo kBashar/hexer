@@ -1,70 +1,69 @@
 package org.kbashar.hexer;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.JComponent;
 
 /**
  * @author Khyrul Bashar
  */
-class ASCIIPane extends JComponent implements ASCIISelectionChangeListener
+class ASCIIPane extends JComponent implements MouseListener
 {
     private HexModel model;
+    private SelectionChangeListener listener;
 
     private static final int LINE_WIDTH = 200;
     private static final int LINE_HEIGHT = 330;
 
-    ASCIIPane(HexModel model)
+    ASCIIPane(HexModel model, SelectionChangeListener listener)
     {
         this.model = model;
-        createUI();
+        this.listener = listener;
+        createUI(listener);
     }
 
-    private void createUI()
+    private void createUI(SelectionChangeListener listener)
     {
         setPreferredSize(new Dimension(LINE_WIDTH, LINE_HEIGHT));
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         for (int i = 0; i < model.size(); i++)
         {
             ASCIIUnit unit = new ASCIIUnit(model.getByte(i), i);
-            unit.addASCIISelectionChangeListener(this);
+            unit.addSelectionChangeListener(listener);
             add(unit);
         }
         requestFocusInWindow();
     }
 
     @Override
-    public void ASCIISelectionChanged(SelectEvent event)
+    public void mouseClicked(MouseEvent mouseEvent)
     {
-        int index = event.getHexIndex();
-        if (event.getNavigation().equals(SelectEvent.NEXT))
-        {
-            index += 1;
-        }
-        else if (event.getNavigation().equals(SelectEvent.PREVIOUS))
-        {
-            index -= 1;
-        }
-        else if (event.getNavigation().equals(SelectEvent.UP))
-        {
-            index -= 16;
-        }
-        else if (event.getNavigation().equals(SelectEvent.DOWN))
-        {
-            index += 16;
-        }
-        if ( index >= 0 && index <= model.size()-1 )
-        {
-            Component component = getComponent(index);
-            if (ASCIIUnit.selectedIndex >= 0)
-            {
-                ((ASCIIUnit)getComponent(ASCIIUnit.selectedIndex)).setSelected(false);
-            }
 
-            ASCIIUnit unit = (ASCIIUnit) component;
-            unit.setSelected(true);
-        }
-        System.out.println(event.getHexIndex() + "\n" + event.getNavigation());
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent)
+    {
+        this.listener.selectionChanged(new SelectEvent(-1, SelectEvent.NONE));
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent)
+    {
+
     }
 }

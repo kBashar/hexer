@@ -9,6 +9,8 @@ public class SelectEvent
     public static final String PREVIOUS = "previous";
     public static final String UP = "up";
     public static final String DOWN= "down";
+    public static final String NONE = "none";
+    public static final String IN = "in";
 
     private final int hexIndex;
     private final String navigation;

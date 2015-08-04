@@ -11,7 +11,9 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     private HexModel model;
     private HexPane hexPane;
     private ASCIIPane asciiPane;
-    private int selectedIndex = -1;
+    private AddressPane addressPane;
+
+    public static int selectedIndex = -1;
 
     HexEditor(HexModel model)
     {
@@ -23,9 +25,11 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     private void createView()
     {
         setLayout(new FlowLayout(FlowLayout.LEFT));
-        hexPane = new HexPane(model, this);
-        asciiPane = new ASCIIPane(model);
+        addressPane = new AddressPane(model.size()/16 + 1);
+        hexPane = new HexPane(model, this, this);
+        asciiPane = new ASCIIPane(model, this);
 
+        add(addressPane);
         add(hexPane);
         add(asciiPane);
     }
@@ -33,7 +37,7 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     @Override
     public void hexChanged(HexChangedEvent event)
     {
-        System.out.println( "Index: " +event.getByteIndex() +
+        System.out.println("Index: " + event.getByteIndex() +
                 "\nOld Value: " + event.getOldValue() +
                 "\nNew value: " + event.getNewValue());
     }
@@ -42,7 +46,13 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     public void selectionChanged(SelectEvent event)
     {
         int index = event.getHexIndex();
-        if (event.getNavigation().equals(SelectEvent.NEXT))
+        if (event.getNavigation().equals(SelectEvent.NONE))
+        {
+            clearSelections();
+            selectedIndex = -1;
+            return;
+        }
+        else if (event.getNavigation().equals(SelectEvent.NEXT))
         {
             index += 1;
         }
@@ -62,13 +72,24 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         {
             if (selectedIndex >= 0)
             {
-                ((ASCIIUnit)asciiPane.getComponent(selectedIndex)).setSelected(false);
-                ((HexUnit)hexPane.getComponent(selectedIndex)).setSelected(false);
+                clearSelections();
             }
 
             ((ASCIIUnit)asciiPane.getComponent(index)).setSelected(true);
             ((HexUnit)hexPane.getComponent(index)).setSelected(true);
+            addressPane.updateAddress(selectedIndex, index);
+            selectedIndex = index;
+
         }
         System.out.println(event.getHexIndex() + "\n" + event.getNavigation());
+    }
+
+    private void clearSelections()
+    {
+        if (selectedIndex != -1)
+        {
+            ((ASCIIUnit)asciiPane.getComponent(selectedIndex)).setSelected(false);
+            ((HexUnit)hexPane.getComponent(selectedIndex)).setSelected(false);
+        }
     }
 }
