@@ -1,11 +1,12 @@
 package org.kbashar.hexer;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
@@ -17,8 +18,8 @@ class HexPane extends JPanel implements  MouseListener
     private HexModel model;
     private SelectionChangeListener listener;
 
-    private static final int WIDTH = 480;
-    private static final int HEIGHT = 330;
+    static final int WIDTH = (int) (Util.WIDTH_UNIT * 4.6);
+    static final int HEIGHT = 330;
 
     HexPane(HexModel model, HexChangeListener listener, SelectionChangeListener selectionChangeListener)
     {
@@ -30,8 +31,11 @@ class HexPane extends JPanel implements  MouseListener
     private void createUI(HexChangeListener listener, SelectionChangeListener selectionChangeListener)
     {
         addMouseListener(this);
+        setOpaque(true);
+        setBackground(Color.WHITE);
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setBorder(new BevelBorder(BevelBorder.RAISED));
+        setLayout(new FlowLayout(FlowLayout.LEFT, 1, 1));
         for (int i = 0; i < model.size(); i++)
         {
             HexUnit unit = new HexUnit(model.getByte(i), i);
@@ -42,14 +46,10 @@ class HexPane extends JPanel implements  MouseListener
         requestFocusInWindow();
     }
 
-
-    private Point indexToPoint(int index)
+    @Override
+    public Dimension getMaximumSize()
     {
-        int x = index % 16;
-        int y = index / 16 + (index%16) > 0 ? 1 : 0;
-        x = x * HexUnit.TOTAL_PIXEL;
-        y = y * HexUnit.TOTAL_PIXEL;
-        return new Point(x -5, y-5);
+        return new Dimension(WIDTH, getHeight());
     }
 
     @Override

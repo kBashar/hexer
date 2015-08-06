@@ -14,25 +14,29 @@ import javax.swing.border.BevelBorder;
  */
 public class AddressPane extends JPanel
 {
-    private int totalLine;
     private Color bgColor = new Color(123, 67, 199);
+    static final int WIDTH = (int) (Util.WIDTH_UNIT * 0.6);
 
     AddressPane(int total)
     {
-        totalLine = total;
         createView(total);
     }
 
     void createView(int total)
     {
-        setPreferredSize(new Dimension(100, 300));
+        setPreferredSize(new Dimension(WIDTH, 300));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(new BevelBorder(BevelBorder.RAISED));
         for (int i = 0; i< total; i++)
         {
             JLabel label = new JLabel(String.format("%07X", i*16));
+            label.setFont(Util.font);
             label.setOpaque(true);
             label.setBorder(new BevelBorder(BevelBorder.RAISED));
-            label.setPreferredSize(new Dimension(100, 30));
+
+            label.setMaximumSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
+            label.setPreferredSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
+            label.setMinimumSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
             add(label);
         }
     }

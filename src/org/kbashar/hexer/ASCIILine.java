@@ -7,43 +7,57 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
-import javax.swing.event.MouseInputListener;
 
 /**
  * @author Khyrul Bashar
  */
-public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseInputListener, KeyListener
+public class ASCIILine extends JComponent implements MouseListener,MouseMotionListener, KeyListener
 {
-    private static final short TOTAL_PIXEL = ASCIIPane.LINE_WIDTH / 16;
+    private static final short TOTAL_PIXEL =  100;
 
     private static final Font font = Util.font;
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
 
     private final int index;
+    private int selectedIndex;
     private byte state = NORMAL;
-    private char[] content = new char[1];
+    private char[] content;
 
     private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
 
-    ASCIIUnit(short bt, int i)
+    ASCIILine(char[] chars, int i)
     {
         index = i;
-        content[0] = Character.toChars(bt)[0];
-        if (!isAsciiPrintable(content[0]))
-        {
-            content[0] = '.';
-        }
-        setPreferredSize(new Dimension(TOTAL_PIXEL, 15));
-        addMouseMotionListener(this);
+        content = chars;
+        addMouseListener(this);
         addMouseListener(this);
         addKeyListener(this);
         setOpaque(false);
         setFocusable(true);
+    }
+
+    @Override
+    public Dimension getMaximumSize()
+    {
+        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
+    }
+
+    @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
     }
 
     @Override
@@ -67,15 +81,20 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
     private void paintInNormal(Graphics g)
     {
         g.setFont(font);
-        g.drawChars(content, 0, 1, 0, Util.CHAR_HEIGHT - 3);
+        g.drawChars(content, 0, content.length, 1, Util.CHAR_HEIGHT - 3);
     }
 
     private void paintInSelected(Graphics g)
     {
-       // g.setColor(new Color(250, 150, 150));
-       // g.drawRect(1, 1, getWidth() - 2, getHeight() - 2);
+        setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
+        int length = g.getFontMetrics().charsWidth(content, 0, selectedIndex-0);
+        g.drawChars(content, 0, selectedIndex - 0, 1,Util.CHAR_HEIGHT - 3);
         g.setColor(new Color(98, 134, 198));
-        g.drawChars(content, 0, 1, 0, Util.CHAR_HEIGHT - 3);
+        g.drawChars(content, selectedIndex, 1, length + 1, Util.CHAR_HEIGHT - 3);
+
+        g.setColor(Color.black);
+        length += g.getFontMetrics().charWidth(content[selectedIndex]);
+        g.drawChars(content, selectedIndex + 1, (content.length - 1) - selectedIndex, length + 1, Util.CHAR_HEIGHT - 3);
     }
 
     private void clearSelection()
@@ -148,23 +167,23 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
     @Override
     public void keyPressed(KeyEvent keyEvent)
     {
-           switch (keyEvent.getKeyCode())
-            {
-                case 37:
-                    fireSelectionChange(SelectEvent.PREVIOUS);
-                    break;
-                case 39:
-                    fireSelectionChange(SelectEvent.NEXT);
-                    break;
-                case 38:
-                    fireSelectionChange(SelectEvent.UP);
-                    break;
-                case 40:
-                    fireSelectionChange(SelectEvent.DOWN);
-                    break;
-                default:
-                    break;
-            }
+        switch (keyEvent.getKeyCode())
+        {
+            case 37:
+                fireSelectionChange(SelectEvent.PREVIOUS);
+                break;
+            case 39:
+                fireSelectionChange(SelectEvent.NEXT);
+                break;
+            case 38:
+                fireSelectionChange(SelectEvent.UP);
+                break;
+            case 40:
+                fireSelectionChange(SelectEvent.DOWN);
+                break;
+            default:
+                break;
+        }
     }
 
     private void fireSelectionChange(String navigation)
@@ -187,20 +206,24 @@ public class ASCIIUnit extends JComponent implements MouseMotionListener, MouseI
         return ch >= 32 && ch < 127;
     }
 
-    public void setSelected(boolean selected)
-    {
-        if (selected && state != SELECTED)
-        {
-            putInSelected();
-        }
-        else if (!selected && state == SELECTED)
-        {
-            clearSelection();
-        }
-    }
-
     public void addSelectionChangeListener(SelectionChangeListener listener)
     {
         selectionChangeListeners.add(listener);
+    }
+
+    public void select(int index)
+    {
+        System.out.println(index);
+        selectedIndex = index;
+        state = SELECTED;
+        repaint();
+    }
+
+
+    public void clearSelection(int indexInLine)
+    {
+        selectedIndex = -1;
+        state = NORMAL;
+        repaint();
     }
 }

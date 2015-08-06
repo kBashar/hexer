@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JComponent;
+import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
@@ -14,7 +15,7 @@ class ASCIIPane extends JComponent implements MouseListener
     private HexModel model;
     private SelectionChangeListener listener;
 
-    private static final int LINE_WIDTH = 200;
+    static final int LINE_WIDTH = 110;
     private static final int LINE_HEIGHT = 330;
 
     ASCIIPane(HexModel model, SelectionChangeListener listener)
@@ -28,19 +29,36 @@ class ASCIIPane extends JComponent implements MouseListener
     {
         setPreferredSize(new Dimension(LINE_WIDTH, LINE_HEIGHT));
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        for (int i = 0; i < model.size(); i++)
+        setBorder(new BevelBorder(BevelBorder.RAISED));
+        for (int i = 1; i <= model.totalLine(); i++)
         {
-            ASCIIUnit unit = new ASCIIUnit(model.getByte(i), i);
-            unit.addSelectionChangeListener(listener);
-            add(unit);
+            System.out.println(model.getLineChars(i));
+            ASCIILine line = new ASCIILine(model.getLineChars(i), i-1);
+            line.addSelectionChangeListener(listener);
+            add(line);
         }
         requestFocusInWindow();
+    }
+
+    void select(int index)
+    {
+        System.out.println("Index: " + index +
+                " Line No: " + HexModel.lineNumber(index) +
+                " Element No: " + HexModel.elementIndexInLine(index));
+        ASCIILine line = (ASCIILine) getComponent(HexModel.lineNumber(index)-1);
+        line.select(HexModel.elementIndexInLine(index));
+    }
+
+    void clearSelection(int index)
+    {
+        ASCIILine line = (ASCIILine) getComponent(HexModel.lineNumber(index)-1);
+        line.clearSelection(HexModel.elementIndexInLine(index));
     }
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-
+        select(18);
     }
 
     @Override

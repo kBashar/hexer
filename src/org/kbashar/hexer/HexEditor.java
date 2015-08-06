@@ -1,6 +1,7 @@
 package org.kbashar.hexer;
 
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import javax.swing.JPanel;
 
 /**
@@ -12,6 +13,7 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     private HexPane hexPane;
     private ASCIIPane asciiPane;
     private AddressPane addressPane;
+    private UpperPane upperPane;
 
     public static int selectedIndex = -1;
 
@@ -24,14 +26,16 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
 
     private void createView()
     {
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setLayout(new BorderLayout());
         addressPane = new AddressPane(model.size()/16 + 1);
         hexPane = new HexPane(model, this, this);
         asciiPane = new ASCIIPane(model, this);
+        upperPane = new UpperPane();
 
-        add(addressPane);
-        add(hexPane);
-        add(asciiPane);
+        add(upperPane, BorderLayout.PAGE_START);
+        add(addressPane, BorderLayout.LINE_START);
+        add(hexPane, BorderLayout.CENTER);
+        add(asciiPane, BorderLayout.LINE_END);
     }
 
     @Override
@@ -40,6 +44,12 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         System.out.println("Index: " + event.getByteIndex() +
                 "\nOld Value: " + event.getOldValue() +
                 "\nNew value: " + event.getNewValue());
+    }
+
+    @Override
+    public Dimension getMaximumSize()
+    {
+        return new Dimension(572, getHeight());
     }
 
     @Override
@@ -75,20 +85,19 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
                 clearSelections();
             }
 
-            ((ASCIIUnit)asciiPane.getComponent(index)).setSelected(true);
+            asciiPane.select(index);
             ((HexUnit)hexPane.getComponent(index)).setSelected(true);
             addressPane.updateAddress(selectedIndex, index);
             selectedIndex = index;
 
         }
-        System.out.println(event.getHexIndex() + "\n" + event.getNavigation());
     }
 
     private void clearSelections()
     {
         if (selectedIndex != -1)
         {
-            ((ASCIIUnit)asciiPane.getComponent(selectedIndex)).setSelected(false);
+            asciiPane.clearSelection(selectedIndex);
             ((HexUnit)hexPane.getComponent(selectedIndex)).setSelected(false);
         }
     }

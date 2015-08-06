@@ -18,9 +18,9 @@ import javax.swing.event.MouseInputListener;
  */
 class HexUnit extends JComponent implements MouseMotionListener, MouseInputListener, KeyListener
 {
-    public static final short TOTAL_PIXEL = 30;
+    public static final short WIDTH = 30;
 
-    private static final Font font = new Font(Font.MONOSPACED, Font.BOLD, 19);
+    private static final Font font = Util.font;
     private static final byte EDIT = 2;
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
@@ -38,21 +38,19 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     {
         index = i;
         content = bt;
-        setPreferredSize(new Dimension(TOTAL_PIXEL-5, TOTAL_PIXEL-5));
         addMouseMotionListener(this);
         addMouseListener(this);
         addKeyListener(this);
         setOpaque(false);
         setFocusable(true);
 
-        chars = Integer.toHexString(content).toCharArray();
+        chars = String.format("%02X", content).toCharArray();
     }
 
     @Override
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-
         switch (state)
         {
             case NORMAL:
@@ -69,43 +67,61 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
         }
     }
 
+    @Override
+    public Dimension getMaximumSize()
+    {
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT);
+    }
+
+    @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT);
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT);
+    }
+
     private void paintInNormal(Graphics g)
     {
-        g.setFont(font);
-        g.setColor(new Color(98, 134, 198));
-        g.drawString(new String(chars), 1, 20);
+        g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        g.setColor(new Color(6, 4, 7));
+        g.drawString(new String(chars), 1, Util.CHAR_HEIGHT - 3);
     }
 
     private void paintInSelected(Graphics g)
     {
-        g.setColor(new Color(250, 150, 150));
-        g.drawRect(0, 0, 24, 24);
-        g.setFont(font);
+       // g.setColor(new Color(250, 150, 150));
+       // g.drawRect(0, 0, getWidth()-1, getHeight()-1);
+        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
         g.setColor(new Color(98, 134, 198));
-        g.drawString(new String(chars), 1, 20);
+        g.drawString(new String(chars), 1, Util.CHAR_HEIGHT - 4);
     }
 
     private void paintInEdit(Graphics g)
     {
-        g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 18));
+        g.setFont(Util.font);
         g.setColor(Color.white);
-        g.fillRect(0, 0, 24, 24);
+        g.fillRect(0, 0, 15, 15);
 
         if (selectedChar == 0)
         {
             g.setColor(Color.black);
-            g.drawChars(chars, 0, 1, 1, 24);
+            g.drawChars(chars, 0, 1, 1, Util.CHAR_HEIGHT - 3);
 
             g.setColor(new Color(98, 134, 198));
-            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), 24);
+            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), Util.CHAR_HEIGHT - 3);
         }
         else if (selectedChar == 1)
         {
             g.setColor(new Color(98, 134, 198));
-            g.drawChars(chars, 0, 1, 1, 24);
+            g.drawChars(chars, 0, 1, 1, Util.CHAR_HEIGHT - 3);
 
             g.setColor(Color.black);
-            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), 24);
+            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), Util.CHAR_HEIGHT - 3);
         }
     }
 
