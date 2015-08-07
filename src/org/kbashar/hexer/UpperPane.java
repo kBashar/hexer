@@ -23,7 +23,7 @@ class UpperPane extends JPanel
     private void createView()
     {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(572, height));
+        setPreferredSize(new Dimension(690, height));
         setBorder(new BevelBorder(BevelBorder.RAISED));
 
         JPanel offset = new JPanel(new BorderLayout());

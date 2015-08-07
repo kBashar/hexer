@@ -126,13 +126,7 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-        switch (mouseEvent.getClickCount())
-        {
-            case 1:
-                putInSelected();
-                fireSelectionChange(SelectEvent.IN);
-                break;
-        }
+
     }
 
     @Override

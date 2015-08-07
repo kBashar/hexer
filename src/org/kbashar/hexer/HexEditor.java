@@ -2,6 +2,7 @@ package org.kbashar.hexer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import javax.swing.JPanel;
 
 /**
@@ -26,16 +27,18 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
 
     private void createView()
     {
-        setLayout(new BorderLayout());
+        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         addressPane = new AddressPane(model.size()/16 + 1);
         hexPane = new HexPane(model, this, this);
         asciiPane = new ASCIIPane(model, this);
         upperPane = new UpperPane();
 
         add(upperPane, BorderLayout.PAGE_START);
-        add(addressPane, BorderLayout.LINE_START);
-        add(hexPane, BorderLayout.CENTER);
-        add(asciiPane, BorderLayout.LINE_END);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panel.add(addressPane);
+        panel.add(hexPane);
+        panel.add(asciiPane);
+        add(panel);
     }
 
     @Override
@@ -49,7 +52,19 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     @Override
     public Dimension getMaximumSize()
     {
-        return new Dimension(572, getHeight());
+        return new Dimension(690, getHeight());
+    }
+
+    @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(690, getHeight());
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(690, getHeight());
     }
 
     @Override
@@ -87,7 +102,7 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
 
             asciiPane.select(index);
             ((HexUnit)hexPane.getComponent(index)).setSelected(true);
-            addressPane.updateAddress(selectedIndex, index);
+            addressPane.updateAddress(index);
             selectedIndex = index;
 
         }
@@ -99,6 +114,7 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         {
             asciiPane.clearSelection(selectedIndex);
             ((HexUnit)hexPane.getComponent(selectedIndex)).setSelected(false);
+            addressPane.clearSelection(selectedIndex);
         }
     }
 }

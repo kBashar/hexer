@@ -15,7 +15,7 @@ class ASCIIPane extends JComponent implements MouseListener
     private HexModel model;
     private SelectionChangeListener listener;
 
-    static final int LINE_WIDTH = 110;
+    static final int LINE_WIDTH = Util.WIDTH_UNIT * 1;
     private static final int LINE_HEIGHT = 330;
 
     ASCIIPane(HexModel model, SelectionChangeListener listener)

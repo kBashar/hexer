@@ -24,7 +24,7 @@ public class AddressPane extends JPanel
 
     void createView(int total)
     {
-        setPreferredSize(new Dimension(WIDTH, 300));
+        setPreferredSize(new Dimension(WIDTH, 330));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new BevelBorder(BevelBorder.RAISED));
         for (int i = 0; i< total; i++)
@@ -41,19 +41,22 @@ public class AddressPane extends JPanel
         }
     }
 
-    void updateAddress(int previousIndex, int presentIndex)
+    void updateAddress(int presentIndex)
     {
-        int previousLine = HexModel.lineNumber(previousIndex +1);
         int presentLine = HexModel.lineNumber(presentIndex + 1);
-        if (previousIndex != -1 && previousLine != presentLine)
-        {
-            JLabel label = (JLabel)getComponent(previousLine - 1);
-            label.setBackground(Color.WHITE);
-            label.setText(String.format("%07X", 16*(previousLine -1)));
-        }
-
         JLabel label = (JLabel) getComponent(presentLine-1);
         label.setBackground(bgColor);
         label.setText(String.format("%07X", presentIndex));
+    }
+
+    void clearSelection(int index)
+    {
+        int line = HexModel.lineNumber(index);
+        if (index != -1)
+        {
+            JLabel label = (JLabel)getComponent(line - 1);
+            label.setBackground(Color.WHITE);
+            label.setText(String.format("%07X", 16*(line -1)));
+        }
     }
 }

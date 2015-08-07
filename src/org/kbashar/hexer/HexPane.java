@@ -53,6 +53,12 @@ class HexPane extends JPanel implements  MouseListener
     }
 
     @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(WIDTH, getHeight());
+    }
+
+    @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
 

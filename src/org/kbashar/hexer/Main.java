@@ -1,5 +1,7 @@
 package org.kbashar.hexer;
 
+import java.awt.Dimension;
+import java.awt.ScrollPane;
 import javax.swing.JFrame;
 
 /**
@@ -24,8 +26,11 @@ public class Main
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.getContentPane().add(new HexEditor(model));
-        //frame.setPreferredSize(new Dimension(500, 300));
+        ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
+        scrollPane.add(new HexEditor(model));
+        frame.getContentPane().add(scrollPane);
+        frame.setPreferredSize(new Dimension(692, 300));
+        //frame.setResizable(false);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
