@@ -104,7 +104,6 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
             ((HexUnit)hexPane.getComponent(index)).setSelected(true);
             addressPane.updateAddress(index);
             selectedIndex = index;
-
         }
     }
 

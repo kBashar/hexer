@@ -43,7 +43,7 @@ public class AddressPane extends JPanel
 
     void updateAddress(int presentIndex)
     {
-        int presentLine = HexModel.lineNumber(presentIndex + 1);
+        int presentLine = HexModel.lineNumber(presentIndex);
         JLabel label = (JLabel) getComponent(presentLine-1);
         label.setBackground(bgColor);
         label.setText(String.format("%07X", presentIndex));

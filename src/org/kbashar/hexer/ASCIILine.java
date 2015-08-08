@@ -18,7 +18,7 @@ import javax.swing.JComponent;
  */
 public class ASCIILine extends JComponent implements MouseListener,MouseMotionListener, KeyListener
 {
-    private static final short TOTAL_PIXEL =  100;
+    static final short WIDTH =  120;
 
     private static final Font font = Util.font;
     private static final byte SELECTED = 1;
@@ -45,19 +45,19 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
     @Override
     public Dimension getMaximumSize()
     {
-        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT+1);
     }
 
     @Override
     public Dimension getMinimumSize()
     {
-        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT+1);
     }
 
     @Override
     public Dimension getPreferredSize()
     {
-        return new Dimension(TOTAL_PIXEL, Util.CHAR_HEIGHT+1);
+        return new Dimension(WIDTH, Util.CHAR_HEIGHT+1);
     }
 
     @Override
