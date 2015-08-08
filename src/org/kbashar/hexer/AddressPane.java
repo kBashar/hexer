@@ -2,6 +2,7 @@ package org.kbashar.hexer;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,7 +15,8 @@ import javax.swing.border.BevelBorder;
  */
 public class AddressPane extends JPanel
 {
-    private Color bgColor = new Color(123, 67, 199);
+    private Color bgColor = new Color(98, 134, 198);
+    private Font font = new Font(Font.MONOSPACED, Font.BOLD, 13);
     static final int WIDTH = (int) (Util.WIDTH_UNIT * 0.6);
 
     AddressPane(int total)
@@ -30,8 +32,10 @@ public class AddressPane extends JPanel
         for (int i = 0; i< total; i++)
         {
             JLabel label = new JLabel(String.format("%07X", i*16));
-            label.setFont(Util.font);
+            label.setFont(font);
             label.setOpaque(true);
+            label.setBackground(Color.WHITE);
+            label.setForeground(Color.black);
             label.setBorder(new BevelBorder(BevelBorder.RAISED));
 
             label.setMaximumSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
@@ -45,7 +49,7 @@ public class AddressPane extends JPanel
     {
         int presentLine = HexModel.lineNumber(presentIndex);
         JLabel label = (JLabel) getComponent(presentLine-1);
-        label.setBackground(bgColor);
+        label.setForeground(bgColor);
         label.setText(String.format("%07X", presentIndex));
     }
 
@@ -55,7 +59,7 @@ public class AddressPane extends JPanel
         if (index != -1)
         {
             JLabel label = (JLabel)getComponent(line - 1);
-            label.setBackground(Color.WHITE);
+            label.setForeground(Color.BLACK);
             label.setText(String.format("%07X", 16*(line -1)));
         }
     }
