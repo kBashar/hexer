@@ -34,7 +34,6 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
         model.addHexModelChangeListener(this);
         for (int i = 1; i <= model.totalLine(); i++)
         {
-            System.out.println(model.getLineChars(i));
             ASCIILine line = new ASCIILine(model.getLineChars(i), i-1);
             line.addSelectionChangeListener(listener);
             add(line);
@@ -44,9 +43,6 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 
     void select(int index)
     {
-        System.out.println("Index: " + index +
-                " Line No: " + HexModel.lineNumber(index) +
-                " Element No: " + HexModel.elementIndexInLine(index));
         ASCIILine line = (ASCIILine) getComponent(HexModel.lineNumber(index)-1);
         line.select(HexModel.elementIndexInLine(index));
     }

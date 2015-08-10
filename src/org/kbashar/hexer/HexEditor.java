@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 /**
  * @author Khyrul Bashar
  */
-public class HexEditor extends JPanel implements HexChangeListener, SelectionChangeListener, BlankClickListener
+public class HexEditor extends JPanel implements SelectionChangeListener, BlankClickListener
 {
     private HexModel model;
     private HexPane hexPane;
@@ -30,7 +30,7 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         addressPane = new AddressPane(model.size()/16 + 1);
-        hexPane = new HexPane(model, this, this);
+        hexPane = new HexPane(model, this);
         asciiPane = new ASCIIPane(model, this);
         upperPane = new UpperPane();
 
@@ -45,13 +45,6 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         panel.add(hexPane);
         panel.add(asciiPane);
         add(panel);
-    }
-
-    @Override
-    public void hexChanged(HexChangedEvent event)
-    {
-        System.out.println("Index: " + event.getByteIndex() +
-                "\nNew value: " + event.getNewValue());
     }
 
     @Override
@@ -108,7 +101,6 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
             addressPane.updateAddress(index);
             if (!event.getNavigation().equals(SelectEvent.EDIT))
             {
-                System.out.println("Not Edit");
                 hexPane.select(index);
             }
             selectedIndex = index;

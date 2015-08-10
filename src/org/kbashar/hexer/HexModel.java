@@ -50,7 +50,6 @@ public class HexModel
 
         for (int i = 0; i < chars.length; i++)
         {
-            System.out.println(data.get(start));
             char c = Character.toChars(data.get(start) & 0XFF)[0];
             if (!isAsciiPrintable(c))
             {
@@ -113,7 +112,6 @@ public class HexModel
         if (!data.get(index).equals(value))
         {
             data.set(index, value);
-
             for (HexModelChangeListener listener: modelChangeListeners)
             {
                 listener.hexModelChanged(new HexModelChangedEvent(index, HexModelChangedEvent.SINGLE_CHANGE));

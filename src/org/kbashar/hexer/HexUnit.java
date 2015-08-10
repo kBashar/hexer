@@ -148,23 +148,20 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     @Override
     public void mouseMoved(MouseEvent mouseEvent)
     {
-        System.out.println("Inside Byte Unit");
-        System.out.println("ByteUnit: x-> " + mouseEvent.getX() + " y-> " + mouseEvent.getY());
     }
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-        if (state == SELECTED)
+        switch (mouseEvent.getClickCount())
         {
-            isFirstCharSelected = true;
-            fireSelectionChange(SelectEvent.EDIT);
-            putInEdit();
-            System.out.println("Already selected");
-        }
-        else
-        {
-            fireSelectionChange(SelectEvent.IN);
+            case 1:
+                fireSelectionChange(SelectEvent.IN);
+                break;
+            case 2:
+                isFirstCharSelected = true;
+                fireSelectionChange(SelectEvent.EDIT);
+                putInEdit();
         }
         mouseEvent.consume();
     }
@@ -201,7 +198,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
             char c = keyEvent.getKeyChar();
             if (isHexChar(c))
             {
-                System.out.println(c);
                 char[] chars = getChars(content);
                 chars[isFirstCharSelected ? 0 : 1] = c;
                 byte b = getByte(chars);

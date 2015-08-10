@@ -4,11 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
@@ -16,7 +11,7 @@ import javax.swing.JComponent;
 /**
  * @author Khyrul Bashar
  */
-public class ASCIILine extends JComponent implements MouseListener,MouseMotionListener, KeyListener
+public class ASCIILine extends JComponent
 {
     static final short WIDTH =  120;
 
@@ -35,9 +30,6 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
     {
         index = i;
         content = chars;
-        addMouseListener(this);
-        addMouseListener(this);
-        addKeyListener(this);
         setOpaque(false);
         setFocusable(true);
     }
@@ -109,92 +101,6 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
         repaint();
     }
 
-    @Override
-    public void mouseDragged(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent mouseEvent)
-    {
-        System.out.println("Inside ASCII Unit");
-        System.out.println("ASCII: x-> " + mouseEvent.getX() + " y-> " + mouseEvent.getY());
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent)
-    {
-
-    }
-
-    @Override
-    public void keyTyped(KeyEvent keyEvent)
-    {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent keyEvent)
-    {
-        switch (keyEvent.getKeyCode())
-        {
-            case 37:
-                fireSelectionChange(SelectEvent.PREVIOUS);
-                break;
-            case 39:
-                fireSelectionChange(SelectEvent.NEXT);
-                break;
-            case 38:
-                fireSelectionChange(SelectEvent.UP);
-                break;
-            case 40:
-                fireSelectionChange(SelectEvent.DOWN);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void fireSelectionChange(String navigation)
-    {
-        SelectEvent event = new SelectEvent(index, navigation);
-
-        for (SelectionChangeListener ls: selectionChangeListeners)
-        {
-            ls.selectionChanged(event);
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent keyEvent)
-    {
-
-    }
-
     private static boolean isAsciiPrintable(char ch) {
         return ch >= 32 && ch < 127;
     }
@@ -206,7 +112,6 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
 
     public void select(int index)
     {
-        System.out.println(index);
         selectedIndex = index;
         state = SELECTED;
         repaint();

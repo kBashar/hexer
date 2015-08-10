@@ -16,7 +16,6 @@ public class Main
         for (byte i = 0; i<100; i++)
         {
             array[i] = i;
-            System.out.print((char)(i));
         }
 
         HexModel model = new HexModel(array);

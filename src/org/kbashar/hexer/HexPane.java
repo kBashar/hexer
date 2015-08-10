@@ -22,13 +22,13 @@ class HexPane extends JPanel implements  MouseListener, HexChangeListener
     static final int HEIGHT = 330;
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
-    HexPane(HexModel model, HexChangeListener listener, SelectionChangeListener selectionChangeListener)
+    HexPane(HexModel model, SelectionChangeListener selectionChangeListener)
     {
         this.model = model;
-        createUI(listener, selectionChangeListener);
+        createUI(selectionChangeListener);
     }
 
-    private void createUI(HexChangeListener listener, SelectionChangeListener selectionChangeListener)
+    private void createUI(SelectionChangeListener selectionChangeListener)
     {
         addMouseListener(this);
         setOpaque(true);
@@ -39,7 +39,7 @@ class HexPane extends JPanel implements  MouseListener, HexChangeListener
         for (int i = 0; i < model.size(); i++)
         {
             HexUnit unit = new HexUnit(model.getByte(i), i);
-            unit.addHexChangeListener(listener);
+            unit.addHexChangeListener(this);
             unit.addSelectionChangedListener(selectionChangeListener);
             add(unit);
         }
