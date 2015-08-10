@@ -97,16 +97,15 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
         g.drawChars(content, selectedIndex + 1, (content.length - 1) - selectedIndex, length + 1, Util.CHAR_HEIGHT - 3);
     }
 
-    private void clearSelection()
-    {
-        state = NORMAL;
-        repaint();
-    }
-
     private void putInSelected()
     {
         state = SELECTED;
-        requestFocusInWindow();
+        repaint();
+    }
+
+    private void putInNormal()
+    {
+        state = NORMAL;
         repaint();
     }
 
@@ -219,5 +218,11 @@ public class ASCIILine extends JComponent implements MouseListener,MouseMotionLi
         selectedIndex = -1;
         state = NORMAL;
         repaint();
+    }
+
+    public void updateContent(char[] chars)
+    {
+        content = chars;
+        putInNormal();
     }
 }

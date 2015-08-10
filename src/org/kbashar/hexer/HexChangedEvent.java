@@ -5,23 +5,16 @@ package org.kbashar.hexer;
  */
 public class HexChangedEvent
 {
-    private final short oldValue;
-    private final short newValue;
+    private final byte newValue;
     private final int byteIndex;
 
-    public HexChangedEvent(short oldValue, short newValue, int byteIndex)
+    public HexChangedEvent(byte newValue, int byteIndex)
     {
-        this.oldValue = oldValue;
         this.newValue = newValue;
         this.byteIndex = byteIndex;
     }
 
-    public short getOldValue()
-    {
-        return oldValue;
-    }
-
-    public short getNewValue()
+    public byte getNewValue()
     {
         return newValue;
     }

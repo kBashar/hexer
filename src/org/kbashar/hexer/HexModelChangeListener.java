@@ -5,5 +5,5 @@ package org.kbashar.hexer;
  */
 public interface HexModelChangeListener
 {
-
+    public void hexModelChanged(HexModelChangedEvent event);
 }

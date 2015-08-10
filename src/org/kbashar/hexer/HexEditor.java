@@ -3,12 +3,13 @@ package org.kbashar.hexer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import javax.swing.JPanel;
 
 /**
  * @author Khyrul Bashar
  */
-public class HexEditor extends JPanel implements HexChangeListener, SelectionChangeListener
+public class HexEditor extends JPanel implements HexChangeListener, SelectionChangeListener, BlankClickListener
 {
     private HexModel model;
     private HexPane hexPane;
@@ -33,6 +34,11 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         asciiPane = new ASCIIPane(model, this);
         upperPane = new UpperPane();
 
+        addressPane.addBlankClickListener(this);
+        hexPane.addBlankClickListener(this);
+        asciiPane.addBlankClickListener(this);
+        upperPane.addBlankClickListener(this);
+
         add(upperPane, BorderLayout.PAGE_START);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panel.add(addressPane);
@@ -45,7 +51,6 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
     public void hexChanged(HexChangedEvent event)
     {
         System.out.println("Index: " + event.getByteIndex() +
-                "\nOld Value: " + event.getOldValue() +
                 "\nNew value: " + event.getNewValue());
     }
 
@@ -74,7 +79,6 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         if (event.getNavigation().equals(SelectEvent.NONE))
         {
             clearSelections();
-            selectedIndex = -1;
             return;
         }
         else if (event.getNavigation().equals(SelectEvent.NEXT))
@@ -101,8 +105,12 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
             }
 
             asciiPane.select(index);
-            ((HexUnit)hexPane.getComponent(index)).setSelected(true);
             addressPane.updateAddress(index);
+            if (!event.getNavigation().equals(SelectEvent.EDIT))
+            {
+                System.out.println("Not Edit");
+                hexPane.select(index);
+            }
             selectedIndex = index;
         }
     }
@@ -112,8 +120,15 @@ public class HexEditor extends JPanel implements HexChangeListener, SelectionCha
         if (selectedIndex != -1)
         {
             asciiPane.clearSelection(selectedIndex);
-            ((HexUnit)hexPane.getComponent(selectedIndex)).setSelected(false);
+            hexPane.clearSelection(selectedIndex);
             addressPane.clearSelection(selectedIndex);
+            selectedIndex = -1;
         }
+    }
+
+    @Override
+    public void blankClick(Point point)
+    {
+        clearSelections();
     }
 }

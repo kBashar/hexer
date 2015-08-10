@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
@@ -13,18 +14,17 @@ import javax.swing.border.BevelBorder;
  *
  * This class shows the hex values of the bytes in the HexViewer.
  */
-class HexPane extends JPanel implements  MouseListener
+class HexPane extends JPanel implements  MouseListener, HexChangeListener
 {
     private HexModel model;
-    private SelectionChangeListener listener;
 
     static final int WIDTH = (int) (Util.WIDTH_UNIT * 4.6);
     static final int HEIGHT = 330;
+    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
     HexPane(HexModel model, HexChangeListener listener, SelectionChangeListener selectionChangeListener)
     {
         this.model = model;
-        this.listener = selectionChangeListener;
         createUI(listener, selectionChangeListener);
     }
 
@@ -58,6 +58,11 @@ class HexPane extends JPanel implements  MouseListener
         return new Dimension(WIDTH, getHeight());
     }
 
+    public void addBlankClickListener(BlankClickListener listener)
+    {
+        blankClickListeners.add(listener);
+    }
+
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
@@ -67,7 +72,10 @@ class HexPane extends JPanel implements  MouseListener
     @Override
     public void mousePressed(MouseEvent mouseEvent)
     {
-        listener.selectionChanged(new SelectEvent(-1, SelectEvent.NONE));
+        for (BlankClickListener listener: blankClickListeners)
+        {
+            listener.blankClick(mouseEvent.getPoint());
+        }
     }
 
     @Override
@@ -86,4 +94,21 @@ class HexPane extends JPanel implements  MouseListener
     public void mouseExited(MouseEvent mouseEvent)
     {
     }
+
+    public void select(int index)
+    {
+        ((HexUnit)getComponent(index)).putInSelected();
+    }
+
+    public void hexChanged(HexChangedEvent event)
+    {
+        model.updateModel(event.getByteIndex(), event.getNewValue());
+    }
+
+    public void clearSelection(int index)
+    {
+        ((HexUnit)getComponent(index)).putInNormal();
+    }
+
+
 }

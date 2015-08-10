@@ -27,14 +27,13 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
 
     private final int index;
     private byte state = NORMAL;
-    private int selectedChar = 0;
-    private short content;
-    private char[] chars;
+    private boolean isFirstCharSelected = true;
+    private byte content;
 
     private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
     private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
 
-    HexUnit(short bt, int i)
+    HexUnit(byte bt, int i)
     {
         index = i;
         content = bt;
@@ -43,8 +42,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
         addKeyListener(this);
         setOpaque(false);
         setFocusable(true);
-
-        chars = String.format("%02X", content).toCharArray();
     }
 
     @Override
@@ -89,65 +86,57 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     {
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         g.setColor(new Color(6, 4, 7));
-        g.drawString(new String(chars), 1, Util.CHAR_HEIGHT - 3);
+        g.drawChars(getChars(content), 0, 2, 1, Util.CHAR_HEIGHT - 3);
     }
 
     private void paintInSelected(Graphics g)
     {
-       // g.setColor(new Color(250, 150, 150));
-       // g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
         g.setColor(new Color(98, 134, 198));
-        g.drawString(new String(chars), 1, Util.CHAR_HEIGHT - 4);
+        g.drawChars(getChars(content), 0, 2, 1, Util.CHAR_HEIGHT - 4);
     }
 
     private void paintInEdit(Graphics g)
     {
-        g.setFont(Util.font);
+        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 15));
         g.setColor(Color.white);
-        g.fillRect(0, 0, 15, 15);
 
-        if (selectedChar == 0)
+        if (isFirstCharSelected)
         {
-            g.setColor(Color.black);
-            g.drawChars(chars, 0, 1, 1, Util.CHAR_HEIGHT - 3);
-
             g.setColor(new Color(98, 134, 198));
-            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), Util.CHAR_HEIGHT - 3);
+            g.drawChars(getChars(content), 0, 1, 1, Util.CHAR_HEIGHT - 3);
+
+            g.setColor(Color.black);
+            g.drawChars(getChars(content), 1, 1, g.getFontMetrics().charWidth(getChars(content)[0]), Util.CHAR_HEIGHT - 3);
         }
-        else if (selectedChar == 1)
+        else
         {
-            g.setColor(new Color(98, 134, 198));
-            g.drawChars(chars, 0, 1, 1, Util.CHAR_HEIGHT - 3);
-
             g.setColor(Color.black);
-            g.drawChars(chars, 1, 1, g.getFontMetrics().charWidth(chars[0]), Util.CHAR_HEIGHT - 3);
+            g.drawChars(getChars(content), 0, 1, 1, Util.CHAR_HEIGHT - 3);
+
+            g.setColor(new Color(98, 134, 198));
+            g.drawChars(getChars(content), 1, 1, g.getFontMetrics().charWidth(getChars(content)[0]), Util.CHAR_HEIGHT - 3);
         }
     }
 
-    private void clearSelection()
-    {
-        state = NORMAL;
-        repaint();
-    }
-
-    private void putInSelected()
+    public void putInSelected()
     {
         state = SELECTED;
         requestFocusInWindow();
         repaint();
     }
 
-    private void putInNormal()
+    public void putInNormal()
     {
-
+        state = NORMAL;
+        repaint();
     }
 
     private void putInEdit()
     {
         state = EDIT;
-        requestFocusInWindow();
         repaint();
+        requestFocusInWindow();
     }
 
     @Override
@@ -166,17 +155,18 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-        switch (mouseEvent.getClickCount())
+        if (state == SELECTED)
         {
-            case 1:
-                putInSelected();
-                fireSelectionChange(SelectEvent.IN);
-                break;
-            case 2:
-                selectedChar = 0;
-                putInEdit();
-                break;
+            isFirstCharSelected = true;
+            fireSelectionChange(SelectEvent.EDIT);
+            putInEdit();
+            System.out.println("Already selected");
         }
+        else
+        {
+            fireSelectionChange(SelectEvent.IN);
+        }
+        mouseEvent.consume();
     }
 
     @Override
@@ -206,19 +196,26 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     @Override
     public void keyTyped(KeyEvent keyEvent)
     {
-        char c = keyEvent.getKeyChar();
-        System.out.println(c);
-        if (isHexChar(c))
+        if (state == EDIT)
         {
-            chars[selectedChar] = c;
-            short newValue = (short) Integer.parseInt(new String(chars), 16);
-            HexChangedEvent event = new HexChangedEvent(content, newValue, index);
-            for (HexChangeListener listener: hexChangeListeners)
+            char c = keyEvent.getKeyChar();
+            if (isHexChar(c))
             {
-                listener.hexChanged(event);
+                System.out.println(c);
+                char[] chars = getChars(content);
+                chars[isFirstCharSelected ? 0 : 1] = c;
+                byte b = getByte(chars);
+                if (content != b)
+                {
+                    content = b;
+                    HexChangedEvent event = new HexChangedEvent(content, index);
+                    for (HexChangeListener listener: hexChangeListeners)
+                    {
+                        listener.hexChanged(event);
+                    }
+                }
+                putInEdit();
             }
-
-            putInEdit();
         }
     }
 
@@ -230,11 +227,11 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
             switch (keyEvent.getKeyCode())
             {
                 case 37:
-                    selectedChar = 0;
+                    isFirstCharSelected = true;
                     putInEdit();
                     break;
                 case 39:
-                    selectedChar = 1;
+                    isFirstCharSelected = false;
                     putInEdit();
                     break;
                 default:
@@ -292,18 +289,16 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
 
     private static boolean isHexChar(char c)
     {
-        return (c >= 0 && c <= 9) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 
-    public void setSelected(boolean selected)
+    private char[] getChars(byte b)
     {
-        if (selected && state != SELECTED)
-        {
-            putInSelected();
-        }
-        else if (!selected && state == SELECTED)
-        {
-            clearSelection();
-        }
+        return String.format("%02X", b & 0XFF).toCharArray();
+    }
+
+    private byte getByte(char[] chars)
+    {
+        return  (byte) (Integer.parseInt(new String(chars), 16) & 0XFF);
     }
 }

@@ -3,6 +3,9 @@ package org.kbashar.hexer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -11,9 +14,11 @@ import javax.swing.border.BevelBorder;
 /**
  * @author Khyrul Bashar
  */
-class UpperPane extends JPanel
+class UpperPane extends JPanel implements MouseListener
 {
     private int height = 30;
+    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
+
     UpperPane()
     {
         super();
@@ -22,6 +27,7 @@ class UpperPane extends JPanel
 
     private void createView()
     {
+        addMouseListener(this);
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(690, height));
         setBorder(new BevelBorder(BevelBorder.RAISED));
@@ -53,5 +59,41 @@ class UpperPane extends JPanel
         add(offset, BorderLayout.LINE_START);
         add(middlePanel, BorderLayout.CENTER);
         add(asciiDump, BorderLayout.LINE_END);
+    }
+    public void addBlankClickListener(BlankClickListener listener)
+    {
+        blankClickListeners.add(listener);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent)
+    {
+        for (BlankClickListener listener: blankClickListeners)
+        {
+            listener.blankClick(mouseEvent.getPoint());
+        }
+    }
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent)
+    {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent)
+    {
+
     }
 }

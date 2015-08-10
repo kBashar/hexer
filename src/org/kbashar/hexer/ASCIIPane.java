@@ -4,32 +4,34 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
  */
-class ASCIIPane extends JComponent implements MouseListener
+class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListener
 {
     private HexModel model;
-    private SelectionChangeListener listener;
 
     static final int LINE_WIDTH = ASCIILine.WIDTH;
     private static final int LINE_HEIGHT = 330;
+    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
     ASCIIPane(HexModel model, SelectionChangeListener listener)
     {
         this.model = model;
-        this.listener = listener;
         createUI(listener);
     }
 
     private void createUI(SelectionChangeListener listener)
     {
+        addMouseListener(this);
         setPreferredSize(new Dimension(LINE_WIDTH, LINE_HEIGHT));
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setBorder(new BevelBorder(BevelBorder.RAISED));
+        model.addHexModelChangeListener(this);
         for (int i = 1; i <= model.totalLine(); i++)
         {
             System.out.println(model.getLineChars(i));
@@ -55,16 +57,24 @@ class ASCIIPane extends JComponent implements MouseListener
         line.clearSelection(HexModel.elementIndexInLine(index));
     }
 
+    public void addBlankClickListener(BlankClickListener listener)
+    {
+        blankClickListeners.add(listener);
+    }
+
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-        select(18);
+
     }
 
     @Override
     public void mousePressed(MouseEvent mouseEvent)
     {
-        this.listener.selectionChanged(new SelectEvent(-1, SelectEvent.NONE));
+        for (BlankClickListener listener: blankClickListeners)
+        {
+            listener.blankClick(mouseEvent.getPoint());
+        }
     }
 
     @Override
@@ -83,5 +93,15 @@ class ASCIIPane extends JComponent implements MouseListener
     public void mouseExited(MouseEvent mouseEvent)
     {
 
+    }
+
+    @Override
+    public void hexModelChanged(HexModelChangedEvent event)
+    {
+        if (event.getChangeType() == HexModelChangedEvent.SINGLE_CHANGE)
+        {
+            int lineNumber = HexModel.lineNumber(event.getStartIndex());
+            ((ASCIILine) getComponent(lineNumber - 1)).updateContent(model.getLineChars(lineNumber));
+        }
     }
 }

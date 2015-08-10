@@ -5,19 +5,33 @@ import java.util.Arrays;
 
 /**
  * @author Khyrul Bashar
+ *
+ * A class that acts as a model for the hex viewer. It holds the data and provide the data as ncessary.
+ * It'll let listen for any underlying data changes.
  */
 public class HexModel
 {
     private ArrayList<Byte> data;
+    private ArrayList<HexModelChangeListener> modelChangeListeners;
 
+    /**
+     * Constructor
+     * @param bytes Byte array.
+     */
     public HexModel(Byte[] bytes)
     {
         data = new ArrayList<Byte>();
         data.ensureCapacity(bytes.length);
-
         data.addAll(Arrays.asList(bytes));
+
+        modelChangeListeners = new ArrayList<HexModelChangeListener>();
     }
 
+    /**
+     * provides the byte for a specific index of the byte array.
+     * @param index int.
+     * @return byte instance
+     */
     public byte getByte(int index)
     {
         return data.get(index).byteValue();
@@ -36,12 +50,14 @@ public class HexModel
 
         for (int i = 0; i < chars.length; i++)
         {
-            char c = Character.toChars(data.get(start++))[0];
+            System.out.println(data.get(start));
+            char c = Character.toChars(data.get(start) & 0XFF)[0];
             if (!isAsciiPrintable(c))
             {
                 c = '.';
             }
             chars[i] = c;
+            start++;
         }
         return chars;
     }
@@ -55,6 +71,10 @@ public class HexModel
         return data.size();
     }
 
+    /**
+     *
+     * @return
+     */
     public int totalLine()
     {
         return size() % 16 != 0 ? size()/16 + 1 : size()/16;
@@ -78,7 +98,26 @@ public class HexModel
         return index%16;
     }
 
-    private static boolean isAsciiPrintable(char ch) {
+    private static boolean isAsciiPrintable(char ch)
+    {
         return ch >= 32 && ch < 127;
+    }
+
+    public void addHexModelChangeListener(HexModelChangeListener listener)
+    {
+        modelChangeListeners.add(listener);
+    }
+
+    public void updateModel(int index, byte value)
+    {
+        if (!data.get(index).equals(value))
+        {
+            data.set(index, value);
+
+            for (HexModelChangeListener listener: modelChangeListeners)
+            {
+                listener.hexModelChanged(new HexModelChangedEvent(index, HexModelChangedEvent.SINGLE_CHANGE));
+            }
+        }
     }
 }
