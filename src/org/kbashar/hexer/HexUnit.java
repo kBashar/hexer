@@ -20,7 +20,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
 {
     public static final short WIDTH = 30;
 
-    private static final Font font = Util.font;
     private static final byte EDIT = 2;
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
@@ -230,6 +229,10 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
                     isFirstCharSelected = false;
                     putInEdit();
                     break;
+                case 10:
+                    putInSelected();
+                    fireSelectionChange(SelectEvent.IN);
+                    break;
                 default:
                     break;
             }
@@ -250,6 +253,10 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
                     break;
                 case 40:
                     fireSelectionChange(SelectEvent.DOWN);
+                    break;
+                case 10:
+                    isFirstCharSelected = true;
+                    putInEdit();
                     break;
                 default:
                     break;

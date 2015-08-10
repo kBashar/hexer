@@ -11,7 +11,7 @@ import javax.swing.JComponent;
 /**
  * @author Khyrul Bashar
  */
-public class ASCIILine extends JComponent
+class ASCIILine extends JComponent
 {
     static final short WIDTH =  120;
 
@@ -110,7 +110,7 @@ public class ASCIILine extends JComponent
         selectionChangeListeners.add(listener);
     }
 
-    public void select(int index)
+    void select(int index)
     {
         selectedIndex = index;
         state = SELECTED;
@@ -118,14 +118,14 @@ public class ASCIILine extends JComponent
     }
 
 
-    public void clearSelection(int indexInLine)
+    void clearSelection(int indexInLine)
     {
         selectedIndex = -1;
         state = NORMAL;
         repaint();
     }
 
-    public void updateContent(char[] chars)
+    void updateContent(char[] chars)
     {
         content = chars;
         putInNormal();
