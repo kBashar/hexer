@@ -121,6 +121,7 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     public void putInSelected()
     {
         state = SELECTED;
+        isFirstCharSelected = true;
         requestFocusInWindow();
         repaint();
     }
@@ -152,23 +153,14 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-        switch (mouseEvent.getClickCount())
-        {
-            case 1:
-                fireSelectionChange(SelectEvent.IN);
-                break;
-            case 2:
-                isFirstCharSelected = true;
-                fireSelectionChange(SelectEvent.EDIT);
-                putInEdit();
-        }
+        fireSelectionChange(SelectEvent.IN);
         mouseEvent.consume();
     }
 
     @Override
     public void mousePressed(MouseEvent mouseEvent)
     {
-
+        System.out.println(mouseEvent.getPoint());
     }
 
     @Override
@@ -192,24 +184,29 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     @Override
     public void keyTyped(KeyEvent keyEvent)
     {
-        if (state == EDIT)
+        char c = keyEvent.getKeyChar();
+        if (isHexChar(c))
         {
-            char c = keyEvent.getKeyChar();
-            if (isHexChar(c))
+            char[] chars = getChars(content);
+            chars[isFirstCharSelected ? 0 : 1] = c;
+            byte b = getByte(chars);
+            if (content != b)
             {
-                char[] chars = getChars(content);
-                chars[isFirstCharSelected ? 0 : 1] = c;
-                byte b = getByte(chars);
-                if (content != b)
+                content = b;
+                HexChangedEvent event = new HexChangedEvent(content, index);
+                for (HexChangeListener listener : hexChangeListeners)
                 {
-                    content = b;
-                    HexChangedEvent event = new HexChangedEvent(content, index);
-                    for (HexChangeListener listener: hexChangeListeners)
-                    {
-                        listener.hexChanged(event);
-                    }
+                    listener.hexChanged(event);
                 }
+            }
+            if (isFirstCharSelected)
+            {
+                isFirstCharSelected = false;
                 putInEdit();
+            }
+            else
+            {
+                fireSelectionChange(SelectEvent.NEXT);
             }
         }
     }
@@ -219,22 +216,19 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     {
         if (state == EDIT)
         {
-            switch (keyEvent.getKeyCode())
+            int keyCode = keyEvent.getKeyCode();
+            if (keyCode == 37 && !isFirstCharSelected)
             {
-                case 37:
-                    isFirstCharSelected = true;
-                    putInEdit();
-                    break;
-                case 39:
-                    isFirstCharSelected = false;
-                    putInEdit();
-                    break;
-                case 10:
-                    putInSelected();
-                    fireSelectionChange(SelectEvent.IN);
-                    break;
-                default:
-                    break;
+                isFirstCharSelected = true;
+                putInEdit();
+            }
+            else if (keyCode == 37 && isFirstCharSelected)
+            {
+                fireSelectionChange(SelectEvent.PREVIOUS);
+            }
+            else if (keyCode == 39)
+            {
+                fireSelectionChange(SelectEvent.NEXT);
             }
             keyEvent.consume();
         }
@@ -254,10 +248,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
                 case 40:
                     fireSelectionChange(SelectEvent.DOWN);
                     break;
-                case 10:
-                    isFirstCharSelected = true;
-                    putInEdit();
-                    break;
                 default:
                     break;
             }
@@ -268,7 +258,7 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
     {
         SelectEvent event = new SelectEvent(index, navigation);
 
-        for (SelectionChangeListener ls: selectionChangeListeners)
+        for (SelectionChangeListener ls : selectionChangeListeners)
         {
             ls.selectionChanged(event);
         }
@@ -302,6 +292,6 @@ class HexUnit extends JComponent implements MouseMotionListener, MouseInputListe
 
     private byte getByte(char[] chars)
     {
-        return  (byte) (Integer.parseInt(new String(chars), 16) & 0XFF);
+        return (byte) (Integer.parseInt(new String(chars), 16) & 0XFF);
     }
 }
