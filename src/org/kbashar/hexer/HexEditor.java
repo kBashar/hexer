@@ -4,7 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 /**
  * @author Khyrul Bashar
@@ -16,6 +27,16 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
     private ASCIIPane asciiPane;
     private AddressPane addressPane;
     private UpperPane upperPane;
+
+    private Action jumpToIndex = new AbstractAction()
+    {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent)
+        {
+            JDialog dialog = createJumpDialog();
+            dialog.setVisible(true);
+        }
+    };
 
     public static int selectedIndex = -1;
 
@@ -29,6 +50,7 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
     private void createView()
     {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
         addressPane = new AddressPane(model.size()/16 + 1);
         hexPane = new HexPane(model, this);
         asciiPane = new ASCIIPane(model, this);
@@ -41,10 +63,28 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
 
         add(upperPane, BorderLayout.PAGE_START);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panel.setPreferredSize(new Dimension(700, (Util.CHAR_HEIGHT + 2) * model.totalLine()));
         panel.add(addressPane);
         panel.add(hexPane);
         panel.add(asciiPane);
-        add(panel);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setPreferredSize(new Dimension(700, 300));
+
+        JScrollBar scrollBar = scrollPane.createVerticalScrollBar();
+        scrollBar.setUnitIncrement(Util.CHAR_HEIGHT+1);
+        scrollBar.setBlockIncrement(Util.CHAR_HEIGHT+1);
+        scrollBar.setValues(0, 30, 1, model.totalLine() * (Util.CHAR_HEIGHT + 1));
+        scrollBar.addAdjustmentListener(hexPane);
+        scrollPane.setVerticalScrollBar(scrollBar);
+
+        scrollPane.setViewportView(panel);
+
+        add(scrollPane);
+
+        KeyStroke jumpKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
+        this.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(jumpKeyStroke, "jump");
+        this.getActionMap().put("jump", jumpToIndex);
     }
 
     @Override
@@ -122,5 +162,15 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
     public void blankClick(Point point)
     {
         clearSelections();
+    }
+
+    private JDialog createJumpDialog()
+    {
+        JDialog dialog = new JDialog(SwingUtilities.windowForComponent(this), "Test Jump");
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().add(new JLabel("Hello"));
+        dialog.setPreferredSize(new Dimension(200, 200));
+        dialog.pack();
+        return dialog;
     }
 }

@@ -31,7 +31,7 @@ public class AddressPane extends JPanel implements MouseListener
     void createView(int total)
     {
         addMouseListener(this);
-        setPreferredSize(new Dimension(WIDTH, 330));
+        setPreferredSize(new Dimension(WIDTH, (Util.CHAR_HEIGHT+2)*total));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new BevelBorder(BevelBorder.RAISED));
         for (int i = 0; i< total; i++)

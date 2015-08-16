@@ -1,7 +1,6 @@
 package org.kbashar.hexer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * @author Khyrul Bashar
@@ -18,11 +17,15 @@ public class HexModel
      * Constructor
      * @param bytes Byte array.
      */
-    public HexModel(Byte[] bytes)
+    public HexModel(byte[] bytes)
     {
         data = new ArrayList<Byte>();
         data.ensureCapacity(bytes.length);
-        data.addAll(Arrays.asList(bytes));
+
+        for (byte b: bytes)
+        {
+            data.add(b);
+        }
 
         modelChangeListeners = new ArrayList<HexModelChangeListener>();
     }
@@ -59,6 +62,20 @@ public class HexModel
             start++;
         }
         return chars;
+    }
+
+    public byte[] getBytesForLine(int lineNumber)
+    {
+        int index = (lineNumber-1) * 16;
+        int length = Math.min(data.size() - index, 16);
+        byte[] bytes = new byte[length];
+
+        for (int i = 0; i < bytes.length; i++)
+        {
+            bytes[i] = data.get(index);
+            index++;
+        }
+        return bytes;
     }
 
     /**

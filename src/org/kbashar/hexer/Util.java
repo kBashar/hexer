@@ -11,4 +11,5 @@ public class Util
     public static final int WIDTH_UNIT = 110;
     public static final int CHAR_HEIGHT = 15;
     public static final int HEIGHT = 30;
+    public static final int MAXIMUM_LINE = 10;
 }

@@ -1,7 +1,10 @@
 package org.kbashar.hexer;
 
 import java.awt.Dimension;
-import java.awt.ScrollPane;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.swing.JFrame;
 
 /**
@@ -9,29 +12,39 @@ import javax.swing.JFrame;
  */
 public class Main
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        Byte[] array = new Byte[100];
+        FileInputStream stream = new FileInputStream("/home/kbashar/java_error_in_IDEA_3988.log");
 
-        for (byte i = 0; i<100; i++)
-        {
-            array[i] = i;
-        }
-
-        HexModel model = new HexModel(array);
+        HexModel model = new HexModel(toByteArray(stream));
         //HexPane hexPane = new HexPane(model, controller);
         //ASCIIPane pane = new ASCIIPane(model);
-
+        System.out.println(model.size());
+        System.out.println(model.totalLine());
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
-        scrollPane.add(new HexEditor(model));
-        frame.getContentPane().add(scrollPane);
+        frame.getContentPane().add(new HexEditor(model));
         frame.setPreferredSize(new Dimension(692, 300));
         //frame.setResizable(false);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public static byte[] toByteArray(InputStream is) throws IOException
+    {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] data = new byte[16384];
+
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+
+        return buffer.toByteArray();
     }
 }

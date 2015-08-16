@@ -28,7 +28,7 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
     private void createUI(SelectionChangeListener listener)
     {
         addMouseListener(this);
-        setPreferredSize(new Dimension(LINE_WIDTH, LINE_HEIGHT));
+        setPreferredSize(new Dimension(LINE_WIDTH, (Util.CHAR_HEIGHT+2)*model.totalLine()));
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setBorder(new BevelBorder(BevelBorder.RAISED));
         model.addHexModelChangeListener(this);
