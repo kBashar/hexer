@@ -12,5 +12,5 @@ public class Util
     public static final int WIDTH_UNIT = 110;
     public static final int CHAR_HEIGHT = 15;
     public static final Color SELECTED_COLOR = new Color(98, 134, 198);
-    public static final Font BOLD_FONT = new Font(Font.SERIF, Font.BOLD, 13);
+    public static final Font BOLD_FONT = new Font(Font.SERIF, Font.BOLD, 12);
 }

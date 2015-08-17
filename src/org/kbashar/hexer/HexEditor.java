@@ -66,12 +66,28 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(panel);
-        scrollPane.setPreferredSize(new Dimension(690, 300));
+        scrollPane.setPreferredSize(new Dimension(690, Util.CHAR_HEIGHT * 20));
+
+        scrollPane.getActionMap().put("unitScrollDown", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+            }
+        });
+
+        scrollPane.getActionMap().put("unitScrollUp", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+            }
+        });
 
         verticalScrollBar = scrollPane.createVerticalScrollBar();
         verticalScrollBar.setUnitIncrement(Util.CHAR_HEIGHT);
         verticalScrollBar.setBlockIncrement(Util.CHAR_HEIGHT );
-        verticalScrollBar.setValues(0, 1, 0, model.totalLine() * (Util.CHAR_HEIGHT));
+        verticalScrollBar.setValues(0, 1, 0,(model.totalLine() +1) * (Util.CHAR_HEIGHT));
         scrollPane.setVerticalScrollBar(verticalScrollBar);
 
         scrollPane.setViewportView(panel);
@@ -122,7 +138,6 @@ public class HexEditor extends JPanel implements SelectionChangeListener, BlankC
         }
         if (index >= 0 && index <= model.size() - 1)
         {
-            System.out.println("Selected Index: " + index);
             hexPane.setSelected(index);
             addressPane.setSelected(index);
             asciiPane.setSelected(index);

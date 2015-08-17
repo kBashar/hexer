@@ -22,6 +22,7 @@ public class AddressPane extends JComponent implements MouseListener
     private int totalLine;
     private int selectedLine = -1;
     private int selectedIndex = -1;
+    int count = 0;
 
     AddressPane(int total, HexModel model)
     {
@@ -37,12 +38,12 @@ public class AddressPane extends JComponent implements MouseListener
         Rectangle bound = g.getClipBounds();
         int x = bound.x;
         int y = bound.y;
-        System.out.println("Address pane " + "X: " + x + " Y: " + y);
+        System.out.println("Count: " +count++ + "---> Address pane " + "X: " + x + " Y: " + y);
         int firstLine = HexModel.lineForYValue(y);
 
         y += Util.CHAR_HEIGHT;
 
-        for (int line = firstLine; line <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        for (int line = firstLine; line < firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
         {
             if (line > totalLine)
             {

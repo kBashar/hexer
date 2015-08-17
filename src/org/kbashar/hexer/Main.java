@@ -1,6 +1,5 @@
 package org.kbashar.hexer;
 
-import java.awt.Dimension;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,7 +23,7 @@ public class Main
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.getContentPane().add(new HexEditor(model));
-        frame.setPreferredSize(new Dimension(690, 350));
+        //frame.setPreferredSize(new Dimension(690, 350));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

@@ -2,7 +2,6 @@ package org.kbashar.hexer;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -37,6 +36,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     private byte editByte = -1;
     private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
     private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
+    private int count;
 
     HexPane(HexModel model)
     {
@@ -54,20 +54,20 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     @Override
     protected void paintComponent(Graphics g)
     {
-        super.paintComponent(g);
         Rectangle bound = g.getClipBounds();
         g.setColor(Color.WHITE);
         g.fillRect(bound.x, bound.y, bound.width, bound.height);
 
         int x = bound.x;
         int y = bound.y;
-        System.out.println("Hex Pane : " + "X: " + x + " Y: " + y);
+        System.out.println("Count: " + count++ + "---> Hex Pane : " + "X: " + x + " Y: " + y + " Width: " + bound.width
+                + " Height: " + bound.height);
         int firstLine = HexModel.lineForYValue(y);
 
         y += Util.CHAR_HEIGHT;
 
         g.setColor(Color.BLACK);
-        for (int i = firstLine; i <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; i++)
+        for (int i = firstLine; i <= firstLine + bound.height/Util.CHAR_HEIGHT; i++)
         {
             if (i > model.totalLine())
             {
@@ -85,7 +85,6 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
                 else if (selectedIndex == index && state == EDIT)
                 {
                     paintInEdit(g, editByte, x, y);
-                    //g.drawString(String.format("%02X", editByte), x, y);
                 }
                 else
                 {
@@ -128,7 +127,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     private AttributedString getSelectedString(String str)
     {
         AttributedString string = new AttributedString(str);
-        string.addAttribute(TextAttribute.FONT, new Font(Font.MONOSPACED, Font.BOLD, 14));
+        string.addAttribute(TextAttribute.FONT, Util.BOLD_FONT);
         string.addAttribute(TextAttribute.FOREGROUND, new Color(98, 134, 198));
         return string;
     }
@@ -157,13 +156,23 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
 
     private void putInSelected(int index)
     {
-        selectedIndex = index;
         state = SELECTED;
         selectedChar = 0;
+        System.out.println("selected Line Number : " + HexModel.lineNumber(index));
+        //byte unit right below selected
+        if (index - selectedIndex == 16)
+        {
+            int y = (HexModel.lineNumber(index)) * Util.CHAR_HEIGHT;
+            scrollRectToVisible(new Rectangle(0, y, 16 * CHAR_WIDTH, Util.CHAR_HEIGHT));
+        }
+        //byte unit right up selected
+        else if (index - selectedIndex == -16)
+        {
+            int y = (HexModel.lineNumber(index)-1) * Util.CHAR_HEIGHT;
+            scrollRectToVisible(new Rectangle(0, y, 16 * CHAR_WIDTH, Util.CHAR_HEIGHT));
+        }
+        selectedIndex = index;
         repaint();
-        int x = HexModel.elementIndexInLine(index) * CHAR_WIDTH;
-        int y = HexModel.lineNumber(index) * Util.CHAR_HEIGHT;
-        scrollRectToVisible(new Rectangle(x, y, 1, 2));
         requestFocusInWindow();
     }
 

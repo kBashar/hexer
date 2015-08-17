@@ -23,6 +23,7 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
     private int selectedIndexInLine;
+    private int count;
 
     ASCIIPane(HexModel model)
     {
@@ -40,12 +41,13 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
         Rectangle bound = g.getClipBounds();
         int x = bound.x;
         int y = bound.y;
-        System.out.println("Ascii pane " + "X: " + x + " Y: " + y);
+
+        System.out.println("Count: " + count++ + "---> Ascii pane " + "X: " + x + " Y: " + y);
         int firstLine = HexModel.lineForYValue(y);
 
         y += Util.CHAR_HEIGHT;
 
-        for (int line = firstLine; line <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        for (int line = firstLine; line < firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
         {
             if (line > model.totalLine())
             {
