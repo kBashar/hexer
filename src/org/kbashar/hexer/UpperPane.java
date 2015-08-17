@@ -40,12 +40,12 @@ class UpperPane extends JPanel implements MouseListener
         offset.setPreferredSize(new Dimension(AddressPane.WIDTH, height));
 
         JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 1));
-        middlePanel.setPreferredSize(new Dimension(HexPane.WIDTH, height));
+        middlePanel.setPreferredSize(new Dimension(WIDTH, height));
         for (int i = 0; i < 16; i++)
         {
             JLabel label = new JLabel(String.format("%02X", i));
-            label.setFont(Util.font);
-            label.setPreferredSize(new Dimension(HexUnit.WIDTH, height));
+            label.setFont(Util.FONT);
+            label.setPreferredSize(new Dimension(WIDTH, height));
             middlePanel.add(label);
         }
 

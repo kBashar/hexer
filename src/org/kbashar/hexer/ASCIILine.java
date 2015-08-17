@@ -15,7 +15,7 @@ class ASCIILine extends JComponent
 {
     static final short WIDTH =  120;
 
-    private static final Font font = Util.font;
+    private static final Font font = Util.FONT;
     private static final byte SELECTED = 1;
     private static final byte NORMAL = 0;
 

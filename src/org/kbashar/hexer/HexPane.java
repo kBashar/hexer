@@ -2,96 +2,286 @@ package org.kbashar.hexer;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.font.TextAttribute;
+import java.text.AttributedString;
 import java.util.ArrayList;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
+import java.util.List;
+import javax.swing.JComponent;
 import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
- *
- * This class shows the hex values of the bytes in the HexViewer.
  */
-final class HexPane extends JPanel implements  MouseListener, HexChangeListener, AdjustmentListener
+public class HexPane extends JComponent implements KeyListener, MouseListener, MouseMotionListener, HexModelChangeListener
 {
     private HexModel model;
+    private static int selectedIndex = -1;
+    private static final byte EDIT = 2;
+    private static final byte SELECTED = 1;
+    private static final byte NORMAL = 0;
 
-    static final int WIDTH = (int) (Util.WIDTH_UNIT * 4.6);
-    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
-    private static final int MAXIMUM_LINE  = 10;
-    private SelectionChangeListener selectionChangeListener;
-    private int totalRenderedLine = 0;
+    private byte state = NORMAL;
+    private static final int CHAR_WIDTH = 25;
+    private int selectedChar = 0;
 
-    HexPane(HexModel model, SelectionChangeListener selectionChangeListener)
+    //TODO eliminate
+    private byte editByte = -1;
+    private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
+    private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
+
+    HexPane(HexModel model)
     {
         this.model = model;
-        this.selectionChangeListener = selectionChangeListener;
-        createUI();
+        model.addHexModelChangeListener(this);
+        setPreferredSize(new Dimension(400, (model.totalLine() + 1) * Util.CHAR_HEIGHT));
+        setBorder(new BevelBorder(BevelBorder.RAISED));
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
+        this.addKeyListener(this);
+        setAutoscrolls(true);
+        setFont(Util.FONT);
     }
 
-    private void createUI()
+    @Override
+    protected void paintComponent(Graphics g)
     {
-        addMouseListener(this);
-        setOpaque(true);
-        setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(WIDTH, (Util.CHAR_HEIGHT+2)*model.totalLine()));
-        setBorder(new BevelBorder(BevelBorder.RAISED));
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        updateLinesFrom(1, model.totalLine());
+        super.paintComponent(g);
+        Rectangle bound = g.getClipBounds();
+        g.setColor(Color.WHITE);
+        g.fillRect(bound.x, bound.y, bound.width, bound.height);
+
+        int x = bound.x;
+        int y = bound.y;
+        System.out.println("Hex Pane : " + "X: " + x + " Y: " + y);
+        int firstLine = HexModel.lineForYValue(y);
+
+        y += Util.CHAR_HEIGHT;
+
+        g.setColor(Color.BLACK);
+        for (int i = firstLine; i <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; i++)
+        {
+            if (i > model.totalLine())
+            {
+                break;
+            }
+            byte[] bytes = model.getBytesForLine(i);
+            int index = (i - 1) * 16;
+            for (byte by : bytes)
+            {
+                String str = String.format("%02X", by);
+                if (selectedIndex == index && state == SELECTED)
+                {
+                    g.drawString(getSelectedString(str).getIterator(), x, y);
+                }
+                else if (selectedIndex == index && state == EDIT)
+                {
+                    paintInEdit(g, editByte, x, y);
+                    //g.drawString(String.format("%02X", editByte), x, y);
+                }
+                else
+                {
+                    g.drawString(str, x, y);
+                }
+                x += CHAR_WIDTH;
+                index++;
+            }
+            x = 0;
+            y += Util.CHAR_HEIGHT;
+        }
+    }
+
+    private void paintInEdit(Graphics g, byte content, int x, int y)
+    {
+        g.setFont(Util.BOLD_FONT);
+        g.setColor(Color.white);
+
+        char[] chars = getChars(content);
+
+        if (selectedChar == 0)
+        {
+            g.setColor(new Color(98, 134, 198));
+            g.drawChars(chars, 0, 1, x, y);
+
+            g.setColor(Color.black);
+            g.drawChars(chars, 1, 1, x + g.getFontMetrics().charWidth(chars[0]), y);
+        }
+        else
+        {
+            g.setColor(Color.black);
+            g.drawChars(chars, 0, 1, x, y);
+
+            g.setColor(new Color(98, 134, 198));
+            g.drawChars(chars, 1, 1,x + g.getFontMetrics().charWidth(chars[0]), y);
+        }
+        setDefault(g);
+    }
+
+    private AttributedString getSelectedString(String str)
+    {
+        AttributedString string = new AttributedString(str);
+        string.addAttribute(TextAttribute.FONT, new Font(Font.MONOSPACED, Font.BOLD, 14));
+        string.addAttribute(TextAttribute.FOREGROUND, new Color(98, 134, 198));
+        return string;
+    }
+
+    private void setDefault(Graphics g)
+    {
+        g.setColor(Color.black);
+        g.setFont(this.getFont());
+    }
+
+    private int getIndexForPoint(Point point)
+    {
+        if (point.x > 16 * CHAR_WIDTH)
+        {
+            return -1;
+        }
+        int y = point.y;
+        int lineNumber = (y+ (Util.CHAR_HEIGHT -(y % Util.CHAR_HEIGHT)))/15;
+        int x = point.x;
+        int elementNumber = (x / CHAR_WIDTH);
+        int index = (lineNumber-1) * 16 + elementNumber;
+        System.out.println("X: " + point.x + "\n" + "Y: " + point.y + "\n"
+                + "Line Number:" + lineNumber + "\n" + "Item number" + elementNumber);
+        return index;
+    }
+
+    private void putInSelected(int index)
+    {
+        selectedIndex = index;
+        state = SELECTED;
+        selectedChar = 0;
+        repaint();
+        int x = HexModel.elementIndexInLine(index) * CHAR_WIDTH;
+        int y = HexModel.lineNumber(index) * Util.CHAR_HEIGHT;
+        scrollRectToVisible(new Rectangle(x, y, 1, 2));
         requestFocusInWindow();
     }
 
-    /**
-     * This adds hex unit in hexpane from the specified line up to end line.
-     * @param startLine int, the starting line.
-     * @param endLine int, the ending line
-     */
-    public void updateLinesFrom(int startLine, int endLine)
+    private void fireSelectionChanged(SelectEvent event)
     {
-        new HexUnitPainter(startLine, endLine, this).execute();
+        for (SelectionChangeListener listener:selectionChangeListeners)
+        {
+            listener.selectionChanged(event);
+        }
+    }
+
+    private void fireHexValueChanged(byte value, int index)
+    {
+        for (HexChangeListener listener:hexChangeListeners)
+        {
+            listener.hexChanged(new HexChangedEvent(editByte, selectedIndex));
+        }
+    }
+
+    public void addSelectionChangeListener(SelectionChangeListener listener)
+    {
+        selectionChangeListeners.add(listener);
+    }
+
+    public void addHexChangeListeners(HexChangeListener listener)
+    {
+        hexChangeListeners.add(listener);
     }
 
     @Override
-    public Dimension getMaximumSize()
+    public void keyTyped(KeyEvent keyEvent)
     {
-        return new Dimension(WIDTH, getHeight());
+        if (selectedIndex != -1)
+        {
+            char c = keyEvent.getKeyChar();
+            if (isHexChar(c))
+            {
+                byte previousByte = model.getByte(selectedIndex);
+                char[] chars = getChars(previousByte);
+                chars[selectedChar] = c;
+                editByte = getByte(chars);
+                if (selectedChar == 0)
+                {
+                    state = EDIT;
+                    selectedChar = 1;
+                    fireHexValueChanged(editByte, selectedIndex);
+                }
+                else
+                {
+                    fireHexValueChanged(editByte, selectedIndex);
+                    fireSelectionChanged(new SelectEvent(selectedIndex, SelectEvent.NEXT));
+                }
+            }
+        }
     }
 
     @Override
-    public Dimension getMinimumSize()
+    public void keyPressed(KeyEvent keyEvent)
     {
-        return new Dimension(WIDTH, getHeight());
+        if (state == SELECTED || state == EDIT)
+        {
+            System.out.println(keyEvent.getKeyCode());
+            switch (keyEvent.getKeyCode())
+            {
+                case 37:
+                    if (state == EDIT && selectedChar == 1)
+                    {
+                        selectedChar = 0;
+                        repaint();
+                    }
+                    else
+                    {
+                        fireSelectionChanged(new SelectEvent(selectedIndex, SelectEvent.PREVIOUS));
+                    }
+                    break;
+                case 39:
+                    fireSelectionChanged(new SelectEvent(selectedIndex, SelectEvent.NEXT));
+                    break;
+                case 38:
+                    fireSelectionChanged(new SelectEvent(selectedIndex, SelectEvent.UP));
+                    break;
+                case 40:
+                    fireSelectionChanged(new SelectEvent(selectedIndex, SelectEvent.DOWN));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
-    public void addBlankClickListener(BlankClickListener listener)
+
+    @Override
+    public void keyReleased(KeyEvent keyEvent)
     {
-        blankClickListeners.add(listener);
+
     }
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent)
     {
-
+        int index = getIndexForPoint(mouseEvent.getPoint());
+        if (index == -1)
+        {
+            fireSelectionChanged(new SelectEvent(-1, SelectEvent.NONE));
+            return;
+        }
+        fireSelectionChanged(new SelectEvent(index, SelectEvent.IN));
     }
 
     @Override
     public void mousePressed(MouseEvent mouseEvent)
     {
-        for (BlankClickListener listener: blankClickListeners)
-        {
-            listener.blankClick(mouseEvent.getPoint());
-        }
+
     }
 
     @Override
     public void mouseReleased(MouseEvent mouseEvent)
     {
-
     }
 
     @Override
@@ -103,76 +293,47 @@ final class HexPane extends JPanel implements  MouseListener, HexChangeListener,
     @Override
     public void mouseExited(MouseEvent mouseEvent)
     {
-    }
 
-    public void select(int index)
-    {
-        ((HexUnit)getComponent(index)).putInSelected();
     }
-
-    public void hexChanged(HexChangedEvent event)
-    {
-        model.updateModel(event.getByteIndex(), event.getNewValue());
-    }
-
-    public void clearSelection(int index)
-    {
-        ((HexUnit)getComponent(index)).putInNormal();
-    }
-
 
     @Override
-    public void adjustmentValueChanged(AdjustmentEvent adjust)
+    public void mouseDragged(MouseEvent mouseEvent)
     {
-       /* Adjustable adjustable = adjust.getAdjustable();
-        System.out.println(adjustable.getMaximum());
-        System.out.println(model.totalLine());
-        System.out.println(adjust.paramString());
-        if (adjust.getAdjustmentType() == AdjustmentEvent.TRACK)
-        {
-            int value = adjust.getValue()/16;
-            if (value > totalRenderedLine && value <= model.totalLine())
-            {
-                updateLinesFrom(totalRenderedLine + 1, value);
-            }
-            System.out.println("Line no: " + value);
-        }*/
+
     }
 
-    private final class HexUnitPainter extends SwingWorker
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent)
     {
-        int startLine;
-        int endLine;
-        HexChangeListener listener;
 
-        HexUnitPainter(int i,int j, HexChangeListener listener)
-        {
-            startLine = i;
-            endLine = j;
-            this.listener = listener;
-        }
+    }
 
-        @Override
-        protected Object doInBackground() throws Exception
+    private static boolean isHexChar(char c)
+    {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    }
+
+    private char[] getChars(byte b)
+    {
+        return String.format("%02X", b & 0XFF).toCharArray();
+    }
+
+    private byte getByte(char[] chars)
+    {
+        return (byte) (Integer.parseInt(new String(chars), 16) & 0XFF);
+    }
+
+    public void setSelected(int index)
+    {
+        if (index != selectedIndex)
         {
-            for (; startLine <= endLine; startLine++)
-            {
-                byte[] bytes = model.getBytesForLine(startLine);
-                int byteIndex = (startLine-1)*16;
-                for (byte b: bytes)
-                {
-                    HexUnit unit = new HexUnit(b, byteIndex);
-                    unit.addHexChangeListener(listener);
-                    unit.addSelectionChangedListener(selectionChangeListener);
-                    add(unit);
-                    byteIndex++;
-                }
-                totalRenderedLine++;
-                //TODO check if repaint even necessary
-                repaint();
-                revalidate();
-            }
-            return null;
+            putInSelected(index);
         }
+    }
+
+    @Override
+    public void hexModelChanged(HexModelChangedEvent event)
+    {
+        repaint();
     }
 }

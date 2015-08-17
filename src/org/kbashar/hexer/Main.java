@@ -17,16 +17,14 @@ public class Main
         FileInputStream stream = new FileInputStream("/home/kbashar/java_error_in_IDEA_3988.log");
 
         HexModel model = new HexModel(toByteArray(stream));
-        //HexPane hexPane = new HexPane(model, controller);
-        //ASCIIPane pane = new ASCIIPane(model);
+
         System.out.println(model.size());
         System.out.println(model.totalLine());
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.getContentPane().add(new HexEditor(model));
-        frame.setPreferredSize(new Dimension(692, 300));
-        //frame.setResizable(false);
+        frame.setPreferredSize(new Dimension(690, 350));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

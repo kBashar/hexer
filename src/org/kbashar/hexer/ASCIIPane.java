@@ -1,12 +1,13 @@
 package org.kbashar.hexer;
 
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.JComponent;
-import javax.swing.border.BevelBorder;
 
 /**
  * @author Khyrul Bashar
@@ -16,35 +17,67 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
     private HexModel model;
 
     static final int LINE_WIDTH = ASCIILine.WIDTH;
-    private static final int LINE_HEIGHT = 330;
-    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
-    ASCIIPane(HexModel model, SelectionChangeListener listener)
+    private int selectedLine = -1;
+    private int selectedIndex = -1;
+
+    private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
+    private int selectedIndexInLine;
+
+    ASCIIPane(HexModel model)
     {
         this.model = model;
-        createUI(listener);
-    }
-
-    private void createUI(SelectionChangeListener listener)
-    {
         addMouseListener(this);
-        setPreferredSize(new Dimension(LINE_WIDTH, (Util.CHAR_HEIGHT+2)*model.totalLine()));
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        setBorder(new BevelBorder(BevelBorder.RAISED));
+        setPreferredSize(new Dimension(LINE_WIDTH, (model.totalLine() + 1) * Util.CHAR_HEIGHT));
         model.addHexModelChangeListener(this);
-        for (int i = 1; i <= model.totalLine(); i++)
-        {
-            ASCIILine line = new ASCIILine(model.getLineChars(i), i-1);
-            line.addSelectionChangeListener(listener);
-            add(line);
-        }
-        requestFocusInWindow();
     }
 
-    void select(int index)
+
+    @Override
+    protected void paintComponent(Graphics g)
     {
-        ASCIILine line = (ASCIILine) getComponent(HexModel.lineNumber(index)-1);
-        line.select(HexModel.elementIndexInLine(index));
+        super.paintComponent(g);
+        Rectangle bound = g.getClipBounds();
+        int x = bound.x;
+        int y = bound.y;
+        System.out.println("Ascii pane " + "X: " + x + " Y: " + y);
+        int firstLine = HexModel.lineForYValue(y);
+
+        y += Util.CHAR_HEIGHT;
+
+        for (int line = firstLine; line <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        {
+            if (line > model.totalLine())
+            {
+                break;
+            }
+            if (line == selectedLine)
+            {
+                paintInSelected(g, x, y);
+            }
+            else
+            {
+                char[] chars = model.getLineChars(line);
+                g.drawChars(chars, 0, chars.length, x, y);
+            }
+            x = 0;
+            y += Util.CHAR_HEIGHT;
+        }
+    }
+
+    private void paintInSelected(Graphics g, int x, int y)
+    {
+        char[] content = model.getLineChars(selectedLine);
+        g.drawChars(content, 0, selectedIndexInLine - 0, x, y);
+
+        g.setColor(Util.SELECTED_COLOR);
+        x += g.getFontMetrics().charsWidth(content, 0, selectedIndexInLine-0);
+        g.drawChars(content, selectedIndexInLine, 1, x, y);
+
+        g.setFont(Util.FONT);
+        g.setColor(Color.black);
+        x+= g.getFontMetrics().charWidth(content[selectedIndexInLine]);
+        g.drawChars(content, selectedIndexInLine+1, (content.length-1)-selectedIndexInLine, x, y);
     }
 
     void clearSelection(int index)
@@ -94,10 +127,16 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
     @Override
     public void hexModelChanged(HexModelChangedEvent event)
     {
-        if (event.getChangeType() == HexModelChangedEvent.SINGLE_CHANGE)
+        repaint();
+    }
+
+    public void setSelected(int index)
+    {
+        if (index != selectedIndex)
         {
-            int lineNumber = HexModel.lineNumber(event.getStartIndex());
-            ((ASCIILine) getComponent(lineNumber - 1)).updateContent(model.getLineChars(lineNumber));
+            selectedLine = HexModel.lineNumber(index);
+            selectedIndexInLine = HexModel.elementIndexInLine(index);
+            repaint();
         }
     }
 }

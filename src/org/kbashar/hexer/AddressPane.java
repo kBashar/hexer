@@ -2,71 +2,75 @@ package org.kbashar.hexer;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
+import javax.swing.JComponent;
 
 /**
  * @author Khyrul Bashar
  *
  * This class shows the address of the currently selected byte.
  */
-public class AddressPane extends JPanel implements MouseListener
+public class AddressPane extends JComponent implements MouseListener
 {
-    private Color bgColor = new Color(98, 134, 198);
-    private Font font = new Font(Font.MONOSPACED, Font.BOLD, 13);
-    static final int WIDTH = (int) (Util.WIDTH_UNIT * 0.6);
+
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
-    AddressPane(int total)
+    private int totalLine;
+    private int selectedLine = -1;
+    private int selectedIndex = -1;
+
+    AddressPane(int total, HexModel model)
     {
-        createView(total);
+        totalLine = total;
+        setPreferredSize(new Dimension(100, (model.totalLine()+1)*Util.CHAR_HEIGHT));
+        setFont(Util.FONT);
     }
 
-    void createView(int total)
+    @Override
+    protected void paintComponent(Graphics g)
     {
-        addMouseListener(this);
-        setPreferredSize(new Dimension(WIDTH, (Util.CHAR_HEIGHT+2)*total));
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(new BevelBorder(BevelBorder.RAISED));
-        for (int i = 0; i< total; i++)
-        {
-            JLabel label = new JLabel(String.format("%07X", i*16));
-            label.setFont(font);
-            label.setOpaque(true);
-            label.setBackground(Color.WHITE);
-            label.setForeground(Color.black);
-            label.setBorder(new BevelBorder(BevelBorder.RAISED));
+        super.paintComponent(g);
+        Rectangle bound = g.getClipBounds();
+        int x = bound.x;
+        int y = bound.y;
+        System.out.println("Address pane " + "X: " + x + " Y: " + y);
+        int firstLine = HexModel.lineForYValue(y);
 
-            label.setMaximumSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
-            label.setPreferredSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
-            label.setMinimumSize(new Dimension(WIDTH, Util.CHAR_HEIGHT+1));
-            add(label);
+        y += Util.CHAR_HEIGHT;
+
+        for (int line = firstLine; line <= firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
+        {
+            if (line > totalLine)
+            {
+                break;
+            }
+            if (line == selectedLine)
+            {
+                paintSelected(g, x, y);
+            }
+            else
+            {
+                g.drawString(String.format("%08X", (line - 1)*16), x, y);
+            }
+            x = 0;
+            y += Util.CHAR_HEIGHT;
         }
     }
 
-    void updateAddress(int presentIndex)
-    {
-        int presentLine = HexModel.lineNumber(presentIndex);
-        JLabel label = (JLabel) getComponent(presentLine-1);
-        label.setForeground(bgColor);
-        label.setText(String.format("%07X", presentIndex));
-    }
 
-    void clearSelection(int index)
+    private void paintSelected(Graphics g, int x, int y)
     {
-        int line = HexModel.lineNumber(index);
-        if (index != -1)
-        {
-            JLabel label = (JLabel)getComponent(line - 1);
-            label.setForeground(Color.BLACK);
-            label.setText(String.format("%07X", 16*(line -1)));
-        }
+        g.setColor(Util.SELECTED_COLOR);
+        g.setFont(Util.BOLD_FONT);
+
+        g.drawString(String.format("%08X", selectedIndex), x, y);
+
+        g.setColor(Color.black);
+        g.setFont(Util.FONT);
     }
 
     public void addBlankClickListener(BlankClickListener listener)
@@ -105,5 +109,16 @@ public class AddressPane extends JPanel implements MouseListener
     public void mouseExited(MouseEvent mouseEvent)
     {
 
+    }
+
+    //TODO -1 index
+    public void setSelected(int index)
+    {
+        if (index != selectedIndex)
+        {
+            selectedLine = HexModel.lineNumber(index);
+            selectedIndex = index;
+            repaint();
+        }
     }
 }
