@@ -13,13 +13,14 @@ public class Main
 {
     public static void main(String[] args) throws IOException
     {
-        FileInputStream stream = new FileInputStream("/home/kbashar/java_error_in_IDEA_3988.log");
+        //TODO open file.
+        FileInputStream stream = new FileInputStream("i.txt");
 
         HexModel model = new HexModel(toByteArray(stream));
 
         System.out.println(model.size());
         System.out.println(model.totalLine());
-        JFrame frame = new JFrame();
+        final JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.getContentPane().add(new HexEditor(model));
