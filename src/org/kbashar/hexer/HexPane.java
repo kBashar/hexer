@@ -33,8 +33,6 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     public static final int CHAR_WIDTH = 25;
     private int selectedChar = 0;
 
-    //TODO eliminate
-    private byte editByte = -1;
     private List<HexChangeListener> hexChangeListeners = new ArrayList<HexChangeListener>();
     private List<SelectionChangeListener> selectionChangeListeners = new ArrayList<SelectionChangeListener>();
     private int count;
@@ -85,7 +83,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
                 }
                 else if (selectedIndex == index && state == EDIT)
                 {
-                    paintInEdit(g, editByte, x, y);
+                    paintInEdit(g, by, x, y);
                 }
                 else
                 {
@@ -189,7 +187,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     {
         for (HexChangeListener listener:hexChangeListeners)
         {
-            listener.hexChanged(new HexChangedEvent(editByte, selectedIndex));
+            listener.hexChanged(new HexChangedEvent(value, selectedIndex));
         }
     }
 
@@ -214,7 +212,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
                 byte previousByte = model.getByte(selectedIndex);
                 char[] chars = getChars(previousByte);
                 chars[selectedChar] = c;
-                editByte = getByte(chars);
+                byte editByte = getByte(chars);
                 if (selectedChar == 0)
                 {
                     state = EDIT;
