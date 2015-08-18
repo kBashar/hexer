@@ -13,7 +13,6 @@ public class Main
 {
     public static void main(String[] args) throws IOException
     {
-        //TODO open file.
         FileInputStream stream = new FileInputStream("i.txt");
 
         HexModel model = new HexModel(toByteArray(stream));

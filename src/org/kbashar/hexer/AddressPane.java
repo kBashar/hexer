@@ -114,7 +114,6 @@ public class AddressPane extends JComponent implements MouseListener
 
     }
 
-    //TODO -1 index
     public void setSelected(int index)
     {
         if (index != selectedIndex)
