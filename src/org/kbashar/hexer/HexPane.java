@@ -22,6 +22,7 @@ import javax.swing.border.BevelBorder;
  */
 public class HexPane extends JComponent implements KeyListener, MouseListener, MouseMotionListener, HexModelChangeListener
 {
+    public static final int WIDTH = 400;
     private HexModel model;
     private static int selectedIndex = -1;
     private static final byte EDIT = 2;
@@ -29,7 +30,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     private static final byte NORMAL = 0;
 
     private byte state = NORMAL;
-    private static final int CHAR_WIDTH = 25;
+    public static final int CHAR_WIDTH = 25;
     private int selectedChar = 0;
 
     //TODO eliminate
@@ -42,7 +43,7 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
     {
         this.model = model;
         model.addHexModelChangeListener(this);
-        setPreferredSize(new Dimension(400, (model.totalLine() + 1) * Util.CHAR_HEIGHT));
+        setPreferredSize(new Dimension(WIDTH, (model.totalLine() + 1) * Util.CHAR_HEIGHT));
         setBorder(new BevelBorder(BevelBorder.RAISED));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
@@ -160,13 +161,13 @@ public class HexPane extends JComponent implements KeyListener, MouseListener, M
         selectedChar = 0;
         System.out.println("selected Line Number : " + HexModel.lineNumber(index));
         //byte unit right below selected
-        if (index - selectedIndex == 16)
+        if (index - selectedIndex >= 16)
         {
             int y = (HexModel.lineNumber(index)) * Util.CHAR_HEIGHT;
             scrollRectToVisible(new Rectangle(0, y, 16 * CHAR_WIDTH, Util.CHAR_HEIGHT));
         }
         //byte unit right up selected
-        else if (index - selectedIndex == -16)
+        else if (index - selectedIndex <= -16)
         {
             int y = (HexModel.lineNumber(index)-1) * Util.CHAR_HEIGHT;
             scrollRectToVisible(new Rectangle(0, y, 16 * CHAR_WIDTH, Util.CHAR_HEIGHT));

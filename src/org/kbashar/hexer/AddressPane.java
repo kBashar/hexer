@@ -17,6 +17,7 @@ import javax.swing.JComponent;
 public class AddressPane extends JComponent implements MouseListener
 {
 
+    public static final int WIDTH = 90;
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
     private int totalLine;
@@ -27,7 +28,7 @@ public class AddressPane extends JComponent implements MouseListener
     AddressPane(int total, HexModel model)
     {
         totalLine = total;
-        setPreferredSize(new Dimension(100, (model.totalLine()+1)*Util.CHAR_HEIGHT));
+        setPreferredSize(new Dimension(WIDTH, (model.totalLine()+1)*Util.CHAR_HEIGHT));
         setFont(Util.FONT);
     }
 
@@ -41,6 +42,7 @@ public class AddressPane extends JComponent implements MouseListener
         System.out.println("Count: " +count++ + "---> Address pane " + "X: " + x + " Y: " + y);
         int firstLine = HexModel.lineForYValue(y);
 
+        x+=10;
         y += Util.CHAR_HEIGHT;
 
         for (int line = firstLine; line < firstLine + bound.getHeight()/Util.CHAR_HEIGHT; line++)
@@ -57,7 +59,7 @@ public class AddressPane extends JComponent implements MouseListener
             {
                 g.drawString(String.format("%08X", (line - 1)*16), x, y);
             }
-            x = 0;
+            x = 10;
             y += Util.CHAR_HEIGHT;
         }
     }

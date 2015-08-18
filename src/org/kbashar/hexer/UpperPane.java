@@ -3,6 +3,7 @@ package org.kbashar.hexer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import javax.swing.border.BevelBorder;
  */
 class UpperPane extends JPanel implements MouseListener
 {
-    private int height = 30;
+    private int height = 25;
     private ArrayList<BlankClickListener> blankClickListeners = new ArrayList<BlankClickListener>();
 
     UpperPane()
@@ -29,7 +30,7 @@ class UpperPane extends JPanel implements MouseListener
     {
         addMouseListener(this);
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(690, height));
+        setPreferredSize(new Dimension(AddressPane.WIDTH + HexPane.WIDTH +  ASCIIPane.LINE_WIDTH, height));
         setBorder(new BevelBorder(BevelBorder.RAISED));
 
         JPanel offset = new JPanel(new BorderLayout());
@@ -39,13 +40,26 @@ class UpperPane extends JPanel implements MouseListener
         offset.add(offsetLabel, BorderLayout.CENTER);
         offset.setPreferredSize(new Dimension(AddressPane.WIDTH, height));
 
-        JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 1));
-        middlePanel.setPreferredSize(new Dimension(WIDTH, height));
-        for (int i = 0; i < 16; i++)
+        JPanel middlePanel1 = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g)
+            {
+                super.paintComponent(g);
+                int x = 0;
+                for (int i = 0; i < 17; i++)
+                {
+                    g.drawString(String.format("%02X", i), x, Util.CHAR_HEIGHT);
+                    x+=HexPane.CHAR_WIDTH;
+                }
+            }
+        };
+        JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        middlePanel1.setPreferredSize(new Dimension(HexPane.WIDTH, height));
+        for (int i = 0; i < 17; i++)
         {
             JLabel label = new JLabel(String.format("%02X", i));
             label.setFont(Util.FONT);
-            label.setPreferredSize(new Dimension(WIDTH, height));
+            label.setPreferredSize(new Dimension(HexPane.CHAR_WIDTH, height));
             middlePanel.add(label);
         }
 
@@ -57,7 +71,7 @@ class UpperPane extends JPanel implements MouseListener
         asciiDump.add(asciiDumpLabel);
 
         add(offset, BorderLayout.LINE_START);
-        add(middlePanel, BorderLayout.CENTER);
+        add(middlePanel1, BorderLayout.CENTER);
         add(asciiDump, BorderLayout.LINE_END);
     }
     public void addBlankClickListener(BlankClickListener listener)

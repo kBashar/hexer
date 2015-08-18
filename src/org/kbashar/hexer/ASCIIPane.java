@@ -16,7 +16,7 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 {
     private HexModel model;
 
-    static final int LINE_WIDTH = ASCIILine.WIDTH;
+    static final int LINE_WIDTH = 130;
 
     private int selectedLine = -1;
     private int selectedIndex = -1;
@@ -69,6 +69,7 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
 
     private void paintInSelected(Graphics g, int x, int y)
     {
+        g.setFont(Util.BOLD_FONT);
         char[] content = model.getLineChars(selectedLine);
         g.drawChars(content, 0, selectedIndexInLine - 0, x, y);
 
@@ -76,16 +77,10 @@ class ASCIIPane extends JComponent implements MouseListener, HexModelChangeListe
         x += g.getFontMetrics().charsWidth(content, 0, selectedIndexInLine-0);
         g.drawChars(content, selectedIndexInLine, 1, x, y);
 
-        g.setFont(Util.FONT);
         g.setColor(Color.black);
         x+= g.getFontMetrics().charWidth(content[selectedIndexInLine]);
         g.drawChars(content, selectedIndexInLine+1, (content.length-1)-selectedIndexInLine, x, y);
-    }
-
-    void clearSelection(int index)
-    {
-        ASCIILine line = (ASCIILine) getComponent(HexModel.lineNumber(index)-1);
-        line.clearSelection(HexModel.elementIndexInLine(index));
+        g.setFont(Util.FONT);
     }
 
     public void addBlankClickListener(BlankClickListener listener)
